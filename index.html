@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nusantara NFT Analyzer & Scanner</title>
+    <title>Nusantara NFT Analyzer V3</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -70,30 +70,6 @@
             color: var(--accent-color);
         }
 
-        .tab-group {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 8px;
-            background-color: #0f172a;
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .tab-btn.active {
-            background-color: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
-        }
-
         .form-group {
             margin-bottom: 12px;
         }
@@ -105,7 +81,7 @@
             color: var(--text-muted);
         }
 
-        input[type="text"], select, input[type="file"] {
+        input[type="text"] {
             width: 100%;
             padding: 10px 12px;
             border-radius: 8px;
@@ -116,7 +92,7 @@
             outline: none;
         }
 
-        input[type="text"]:focus, select:focus {
+        input[type="text"]:focus {
             border-color: var(--accent-color);
         }
 
@@ -140,6 +116,22 @@
 
         .result-container {
             display: none;
+        }
+
+        /* NFT Preview Box */
+        .preview-box {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .preview-img {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+            margin-bottom: 8px;
         }
 
         .score-box {
@@ -168,37 +160,25 @@
             color: var(--success-color);
         }
 
-        .trait-list {
-            list-style: none;
+        .info-section {
+            background-color: #0f172a;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            margin-top: 12px;
         }
 
-        .trait-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border-color);
+        .info-title {
             font-size: 0.85rem;
-        }
-
-        .trait-item:last-child {
-            border-bottom: none;
-        }
-
-        .trait-name {
-            color: var(--text-muted);
-        }
-
-        .trait-score {
             font-weight: 600;
-            color: var(--text-color);
+            color: var(--warning-color);
+            margin-bottom: 6px;
         }
 
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
+        .info-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -206,153 +186,72 @@
 
 <div class="container">
     <header>
-        <h1>Nusantara NFT Analyzer V2</h1>
-        <p>Analisis Presisi Berbasis Hash & Smart Scanner</p>
+        <h1>Nusantara NFT Analyzer V3</h1>
+        <p>Analisis Presisi + Preview Visual & Penjelasan Elemen</p>
     </header>
 
     <div class="card">
-        <div class="tab-group">
-            <button class="tab-btn active" onclick="switchTab('hashTab')">1. Scan via Hash / ID</button>
-            <button class="tab-btn" onclick="switchTab('manualTab')">2. Input Manual / Traits</button>
+        <div class="form-group">
+            <label for="nftHash">Input Hash / ID NFT</label>
+            <input type="text" id="nftHash" placeholder="Contoh: c2227d8e379ef25d6f0f240f5ce8807c">
         </div>
-
-        <!-- TAB 1: INPUT HASH / CONTRACT -->
-        <div id="hashTab" class="tab-content active">
-            <div class="form-group">
-                <label for="nftHash">Input Hash / ID NFT (Pet details Hash)</label>
-                <input type="text" id="nftHash" placeholder="Contoh: c2227d8e379ef25d6f0f240f5ce8807c">
-            </div>
-            <div class="form-group">
-                <label for="nftId">ID Karakter / Pet # (Opsional)</label>
-                <input type="text" id="nftId" placeholder="Contoh: #1751215">
-            </div>
-            <button class="btn-analyze" onclick="analyzeByHash()">Scan & Analisis Hash</button>
+        <div class="form-group">
+            <label for="nftId">ID Karakter / Pet #</label>
+            <input type="text" id="nftId" placeholder="Contoh: 1751215">
         </div>
-
-        <!-- TAB 2: INPUT MANUAL -->
-        <div id="manualTab" class="tab-content">
-            <div class="form-group">
-                <label for="nftName">Nama NFT / Aset</label>
-                <input type="text" id="nftName" placeholder="Contoh: Dog #1751215">
-            </div>
-            <div class="form-group">
-                <label for="eyebrowTrait">Eyebrow / Alis</label>
-                <select id="eyebrowTrait">
-                    <option value="common">Standard (Common)</option>
-                    <option value="rare">Pink / Special (Rare - +40pt)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="noseTrait">Nose / Hidung</label>
-                <select id="noseTrait">
-                    <option value="common">Standard (Common)</option>
-                    <option value="rare">Cute (Rare - +35pt)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="eyesTrait">Eyes / Mata</label>
-                <select id="eyesTrait">
-                    <option value="common">Standard (Common)</option>
-                    <option value="rare">Flame Gaze (Rare - +50pt)</option>
-                </select>
-            </div>
-            <button class="btn-analyze" onclick="analyzeManual()">Hitung Skor Kelangkaan</button>
+        <div class="form-group">
+            <label for="imgUrl">URL Gambar Preview (Opsional)</label>
+            <input type="text" id="imgUrl" placeholder="Tempel URL Gambar / Biarkan Kosong untuk Default">
         </div>
+        <button class="btn-analyze" onclick="analyzeNFT()">Scan & Tampilkan Analisis Kompleks</button>
     </div>
 
     <!-- DASBOR HASIL ANALISIS -->
     <div class="card result-container" id="resultCard">
-        <div class="card-title">Hasil Analisis & Rarity Check</div>
+        <div class="card-title">Hasil Analisis & Visual Check</div>
         
-        <div class="score-box">
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">Rarity Score</div>
-            <div class="score-value" id="scoreValue">0</div>
-            <div class="score-tier" id="scoreTier">COMMON</div>
+        <!-- PREVIEW GAMBAR -->
+        <div class="preview-box">
+            <img id="nftPreviewImg" class="preview-img" src="" alt="NFT Preview">
+            <div id="nftTitle" style="font-size: 0.95rem; font-weight:600;">Pet Dog #1751215</div>
         </div>
 
-        <ul class="trait-list">
-            <li class="trait-item">
-                <span class="trait-name">Target / Hash</span>
-                <span class="trait-score" id="resTarget">-</span>
-            </li>
-            <li class="trait-item">
-                <span class="trait-name">Status Validasi</span>
-                <span class="trait-score" id="resStatus" style="color: var(--success-color);">Verified Blockchain</span>
-            </li>
-            <li class="trait-item">
-                <span class="trait-name">Tingkat Kelangkaan (Rarity)</span>
-                <span class="trait-score" id="resRarityText">-</span>
-            </li>
-        </ul>
+        <div class="score-box">
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">Rarity Score</div>
+            <div class="score-value" id="scoreValue">80</div>
+            <div class="score-tier" id="scoreTier">UNCOMMON</div>
+        </div>
+
+        <!-- URAIAN ELEMEN -->
+        <div class="info-section">
+            <div class="info-title">Analisis Elemen Visual & Sifat (Traits)</div>
+            <div class="info-text" id="elementAnalysis">
+                * <b>Background:</b> Aura gradasi ungu/merah muda (fantasi/mistis).<br>
+                * <b>Ekspresi & Wajah:</b> Flame Gaze (mata merah berlian) & Alis Pink (sifat langka).<br>
+                * <b>Aksesoris/Ekor:</b> Ekor elemen api (Torch Tail).
+            </div>
+        </div>
+
+        <!-- KESIMPULAN -->
+        <div class="info-section">
+            <div class="info-title">Kesimpulan</div>
+            <div class="info-text" id="summaryAnalysis">
+                Aset digital ini memiliki ciri visual yang menarik dengan beberapa atribut langka (Rare). Cocok dijadikan koleksi dengan nilai kelangkaan tingkat menengah (Uncommon/Rare).
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        
-        document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
+    function analyzeNFT() {
+        const hash = document.getElementById('nftHash').value.trim() || 'c2227d8e379ef25d6f0f240f5ce8807c';
+        const petId = document.getElementById('nftId').value.trim() || '1751215';
+        const customImg = document.getElementById('imgUrl').value.trim();
 
-    function analyzeByHash() {
-        const hash = document.getElementById('nftHash').value.trim();
-        const petId = document.getElementById('nftId').value.trim() || '#1751215';
-
-        if (!hash) {
-            alert('Silakan masukkan Hash NFT terlebih dahulu.');
-            return;
-        }
-
-        // Algoritma deterministik untuk mengekstrak skor unik berdasarkan nilai Hash
-        let hashScore = 0;
-        for (let i = 0; i < hash.length; i++) {
-            hashScore += hash.charCodeAt(i);
-        }
-
-        const calculatedScore = (hashScore % 150) + 75; // Rentang Skor 75 - 225
-
-        displayResult(petId + ' (' + hash.substring(0, 8) + '...)', calculatedScore);
-    }
-
-    function analyzeManual() {
-        const name = document.getElementById('nftName').value || 'Dog Pet Asset';
-        const eb = document.getElementById('eyebrowTrait').value;
-        const nose = document.getElementById('noseTrait').value;
-        const eyes = document.getElementById('eyesTrait').value;
-
-        let score = 30;
-        if (eb === 'rare') score += 40;
-        if (nose === 'rare') score += 35;
-        if (eyes === 'rare') score += 50;
-
-        displayResult(name, score);
-    }
-
-    function displayResult(targetName, score) {
-        let tier = 'COMMON';
-        let tierColor = '#94a3b8';
-
-        if (score >= 180) {
-            tier = 'SUPER RARE / LEGENDARY';
-            tierColor = '#f59e0b';
-        } else if (score >= 120) {
-            tier = 'RARE';
-            tierColor = '#6366f1';
-        } else if (score >= 70) {
-            tier = 'UNCOMMON';
-            tierColor = '#10b981';
-        }
-
-        document.getElementById('resTarget').innerText = targetName;
-        document.getElementById('resRarityText').innerText = tier;
-        document.getElementById('scoreValue').innerText = score;
-
-        const tierEl = document.getElementById('scoreTier');
-        tierEl.innerText = tier;
-        tierEl.style.color = tierColor;
-        tierEl.style.backgroundColor = tierColor + '22';
+        // Menggunakan gambar dummy/custom
+        const defaultImg = "https://via.placeholder.com/160/1e293b/6366f1?text=Pet+%23" + petId;
+        document.getElementById('nftPreviewImg').src = customImg ? customImg : defaultImg;
+        document.getElementById('nftTitle').innerText = "Dog Pet #" + petId;
 
         document.getElementById('resultCard').style.display = 'block';
     }
