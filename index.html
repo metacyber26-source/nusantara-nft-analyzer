@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis & Kalkulator Kelangkaan NFT - Nusantara AI</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--accent-color);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: #0f172a;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--accent-color);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-color);
+        }
+
+        button.btn-analyze {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button.btn-analyze:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .result-container {
+            display: none;
+        }
+
+        .score-box {
+            text-align: center;
+            padding: 20px;
+            background-color: #0f172a;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        .score-tier {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+        }
+
+        .trait-list {
+            list-style: none;
+        }
+
+        .trait-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .trait-item:last-child {
+            border-bottom: none;
+        }
+
+        .trait-name {
+            color: var(--text-muted);
+        }
+
+        .trait-score {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Aplikasi Analisis & Skor Kelangkaan NFT</h1>
+        <p>Kalkulator Rarity dan Atribut Aset Digital</p>
+    </header>
+
+    <div class="card">
+        <div class="card-title">1. Input Data NFT</div>
+        
+        <div class="form-group">
+            <label for="nftName">Nama NFT / Aset</label>
+            <input type="text" id="nftName" placeholder="Contoh: Dog Genesis #001">
+        </div>
+
+        <div class="form-group">
+            <label for="bgTrait">Latar Belakang (Background)</label>
+            <select id="bgTrait">
+                <option value="common">Polos / Standar (Common - Rarity 50%)</option>
+                <option value="uncommon">Gradasi Soft / Pastel (Uncommon - Rarity 30%)</option>
+                <option value="rare">Gradasi Neon / Glow (Rare - Rarity 15%)</option>
+                <option value="legendary">Animated / Custom Space (Legendary - Rarity 5%)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="eyeTrait">Tipe Mata / Wajah</label>
+            <select id="eyeTrait">
+                <option value="common">Mata Biasa (Common)</option>
+                <option value="uncommon">Mata Berlian / Gem (Uncommon)</option>
+                <option value="rare">Mata Laser / Glow (Rare)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="tailTrait">Bentuk Ekor / Aksesoris</label>
+            <select id="tailTrait">
+                <option value="common">Ekor Tunggal Standar (Common)</option>
+                <option value="rare">Ekor Ganda / Twin Tail (Rare)</option>
+                <option value="legendary">Ekor Api / Element Effect (Legendary)</option>
+            </select>
+        </div>
+
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="isGenesis">
+            <label for="isGenesis" style="margin-bottom:0; color: var(--text-color);">Edisi Perdana (Genesis Batch)</label>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button class="btn-analyze" onclick="analyzeNFT()">Hitung Skor Kelangkaan</button>
+        </div>
+    </div>
+
+    <div class="card result-container" id="resultCard">
+        <div class="card-title">2. Hasil Analisis Aset</div>
+        
+        <div class="score-box">
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">Rarity Score</div>
+            <div class="score-value" id="scoreValue">0</div>
+            <div class="score-tier" id="scoreTier">COMMON</div>
+        </div>
+
+        <ul class="trait-list">
+            <li class="trait-item">
+                <span class="trait-name">Nama Aset</span>
+                <span class="trait-score" id="resName">-</span>
+            </li>
+            <li class="trait-item">
+                <span class="trait-name">Poin Latar Belakang</span>
+                <span class="trait-score" id="resBg">0 pt</span>
+            </li>
+            <li class="trait-item">
+                <span class="trait-name">Poin Karakter / Wajah</span>
+                <span class="trait-score" id="resEye">0 pt</span>
+            </li>
+            <li class="trait-item">
+                <span class="trait-name">Poin Ekor / Efek</span>
+                <span class="trait-score" id="resTail">0 pt</span>
+            </li>
+            <li class="trait-item">
+                <span class="trait-name">Bonus Genesis</span>
+                <span class="trait-score" id="resGenesis">0 pt</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function analyzeNFT() {
+        const name = document.getElementById('nftName').value || 'Aset NFT Tanpa Nama';
+        const bg = document.getElementById('bgTrait').value;
+        const eye = document.getElementById('eyeTrait').value;
+        const tail = document.getElementById('tailTrait').value;
+        const isGenesis = document.getElementById('isGenesis').checked;
+
+        let bgScore = 10;
+        if (bg === 'uncommon') bgScore = 25;
+        if (bg === 'rare') bgScore = 50;
+        if (bg === 'legendary') bgScore = 100;
+
+        let eyeScore = 10;
+        if (eye === 'uncommon') eyeScore = 30;
+        if (eye === 'rare') eyeScore = 60;
+
+        let tailScore = 10;
+        if (tail === 'rare') tailScore = 40;
+        if (tail === 'legendary') tailScore = 90;
+
+        let genesisBonus = isGenesis ? 50 : 0;
+
+        const totalScore = bgScore + eyeScore + tailScore + genesisBonus;
+
+        let tier = 'COMMON';
+        let tierColor = '#94a3b8';
+
+        if (totalScore >= 200) {
+            tier = 'LEGENDARY';
+            tierColor = '#f59e0b';
+        } else if (totalScore >= 120) {
+            tier = 'RARE';
+            tierColor = '#6366f1';
+        } else if (totalScore >= 70) {
+            tier = 'UNCOMMON';
+            tierColor = '#10b981';
+        }
+
+        document.getElementById('resName').innerText = name;
+        document.getElementById('resBg').innerText = '+' + bgScore + ' pt';
+        document.getElementById('resEye').innerText = '+' + eyeScore + ' pt';
+        document.getElementById('resTail').innerText = '+' + tailScore + ' pt';
+        document.getElementById('resGenesis').innerText = '+' + genesisBonus + ' pt';
+
+        document.getElementById('scoreValue').innerText = totalScore;
+        const tierEl = document.getElementById('scoreTier');
+        tierEl.innerText = tier;
+        tierEl.style.color = tierColor;
+        tierEl.style.backgroundColor = tierColor + '22';
+
+        document.getElementById('resultCard').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
