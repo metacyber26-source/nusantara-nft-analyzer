@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nusantara NFT Analyzer V3</title>
+    <title>Nusantara NFT Analyzer V3.1</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -81,7 +81,7 @@
             color: var(--text-muted);
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="file"] {
             width: 100%;
             padding: 10px 12px;
             border-radius: 8px;
@@ -92,8 +92,8 @@
             outline: none;
         }
 
-        input[type="text"]:focus {
-            border-color: var(--accent-color);
+        input[type="file"] {
+            cursor: pointer;
         }
 
         button.btn-analyze {
@@ -118,7 +118,6 @@
             display: none;
         }
 
-        /* NFT Preview Box */
         .preview-box {
             text-align: center;
             margin-bottom: 16px;
@@ -131,7 +130,8 @@
             border-radius: 50%;
             border: 3px solid var(--accent-color);
             box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
-            margin-bottom: 8px;
+            margin: 0 auto 8px auto;
+            display: block;
         }
 
         .score-box {
@@ -186,8 +186,8 @@
 
 <div class="container">
     <header>
-        <h1>Nusantara NFT Analyzer V3</h1>
-        <p>Analisis Presisi + Preview Visual & Penjelasan Elemen</p>
+        <h1>Nusantara NFT Analyzer V3.1</h1>
+        <p>Analisis Presisi + Upload & Preview Gambar Stabel</p>
     </header>
 
     <div class="card">
@@ -200,17 +200,15 @@
             <input type="text" id="nftId" placeholder="Contoh: 1751215">
         </div>
         <div class="form-group">
-            <label for="imgUrl">URL Gambar Preview (Opsional)</label>
-            <input type="text" id="imgUrl" placeholder="Tempel URL Gambar / Biarkan Kosong untuk Default">
+            <label for="imgUpload">Unggah Gambar NFT (SS/File Gambar)</label>
+            <input type="file" id="imgUpload" accept="image/*">
         </div>
-        <button class="btn-analyze" onclick="analyzeNFT()">Scan & Tampilkan Analisis Kompleks</button>
+        <button class="btn-analyze" onclick="analyzeNFT()">Scan & Tampilkan Analisis</button>
     </div>
 
-    <!-- DASBOR HASIL ANALISIS -->
     <div class="card result-container" id="resultCard">
         <div class="card-title">Hasil Analisis & Visual Check</div>
         
-        <!-- PREVIEW GAMBAR -->
         <div class="preview-box">
             <img id="nftPreviewImg" class="preview-img" src="" alt="NFT Preview">
             <div id="nftTitle" style="font-size: 0.95rem; font-weight:600;">Pet Dog #1751215</div>
@@ -222,20 +220,18 @@
             <div class="score-tier" id="scoreTier">UNCOMMON</div>
         </div>
 
-        <!-- URAIAN ELEMEN -->
         <div class="info-section">
             <div class="info-title">Analisis Elemen Visual & Sifat (Traits)</div>
-            <div class="info-text" id="elementAnalysis">
+            <div class="info-text">
                 * <b>Background:</b> Aura gradasi ungu/merah muda (fantasi/mistis).<br>
                 * <b>Ekspresi & Wajah:</b> Flame Gaze (mata merah berlian) & Alis Pink (sifat langka).<br>
                 * <b>Aksesoris/Ekor:</b> Ekor elemen api (Torch Tail).
             </div>
         </div>
 
-        <!-- KESIMPULAN -->
         <div class="info-section">
             <div class="info-title">Kesimpulan</div>
-            <div class="info-text" id="summaryAnalysis">
+            <div class="info-text">
                 Aset digital ini memiliki ciri visual yang menarik dengan beberapa atribut langka (Rare). Cocok dijadikan koleksi dengan nilai kelangkaan tingkat menengah (Uncommon/Rare).
             </div>
         </div>
@@ -243,16 +239,25 @@
 </div>
 
 <script>
+    // Local SVG Avatar untuk fallback
+    const defaultSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='1.5'><rect width='24' height='24' fill='%231e293b'/><circle cx='12' cy='10' r='4'/><path d='M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6'/></svg>";
+
     function analyzeNFT() {
-        const hash = document.getElementById('nftHash').value.trim() || 'c2227d8e379ef25d6f0f240f5ce8807c';
         const petId = document.getElementById('nftId').value.trim() || '1751215';
-        const customImg = document.getElementById('imgUrl').value.trim();
+        const fileInput = document.getElementById('imgUpload');
+        const imgElement = document.getElementById('nftPreviewImg');
 
-        // Menggunakan gambar dummy/custom
-        const defaultImg = "https://via.placeholder.com/160/1e293b/6366f1?text=Pet+%23" + petId;
-        document.getElementById('nftPreviewImg').src = customImg ? customImg : defaultImg;
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imgElement.src = e.target.result;
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            imgElement.src = defaultSvg;
+        }
+
         document.getElementById('nftTitle').innerText = "Dog Pet #" + petId;
-
         document.getElementById('resultCard').style.display = 'block';
     }
 </script>
