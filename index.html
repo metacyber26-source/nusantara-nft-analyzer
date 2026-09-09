@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nusantara NFT Analyzer V4</title>
+    <title>Nusantara NFT Analyzer V5</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -61,6 +61,7 @@
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 16px;
+            position: relative;
         }
 
         .card-title {
@@ -68,6 +69,19 @@
             font-weight: 600;
             margin-bottom: 12px;
             color: var(--accent-color);
+        }
+
+        .asset-id-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background-color: rgba(99, 102, 241, 0.2);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
 
         .form-group {
@@ -81,7 +95,7 @@
             color: var(--text-muted);
         }
 
-        input[type="text"], select, input[type="file"] {
+        input[type="text"], input[type="file"] {
             width: 100%;
             padding: 10px 12px;
             border-radius: 8px;
@@ -130,30 +144,12 @@
             display: block;
         }
 
-        .score-box {
+        .ai-status {
             text-align: center;
-            padding: 16px;
-            background-color: #0f172a;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .score-value {
-            font-size: 2.2rem;
-            font-weight: bold;
-            color: var(--success-color);
-        }
-
-        .score-tier {
-            display: inline-block;
-            margin-top: 4px;
-            padding: 4px 12px;
-            border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 600;
-            background-color: rgba(16, 185, 129, 0.2);
             color: var(--success-color);
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .info-section {
@@ -187,8 +183,6 @@
         }
 
         .trait-header {
-            display: flex;
-            justify-content: space-between;
             font-weight: 600;
             color: var(--text-color);
             margin-bottom: 2px;
@@ -198,118 +192,149 @@
             color: var(--text-muted);
             font-size: 0.78rem;
         }
+
+        /* Share & Copy Buttons */
+        .btn-group-share {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-action {
+            flex: 1;
+            min-width: 120px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: #0f172a;
+            color: var(--text-color);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-copy {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .disclaimer {
+            font-size: 0.75rem;
+            font-style: italic;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: rgba(255,255,255,0.03);
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Nusantara NFT Analyzer V4</h1>
-        <p>Analisis Atribut Visual, Kelangkaan, & Makna Filosofis Aset</p>
+        <h1>Nusantara NFT Analyzer V5</h1>
+        <p>Analisis Filosofi Visual & Integrasi Medsos Berbasis AI-AGI</p>
     </header>
 
     <div class="card">
-        <div class="card-title">Input & Parameter NFT</div>
+        <div class="card-title">Input & Parameter Hash</div>
         
         <div class="form-group">
-            <label for="nftHash">Input Hash / ID NFT</label>
+            <label for="nftHash">Input Hash / ID NFT (Copy-Paste)</label>
             <input type="text" id="nftHash" placeholder="Contoh: c2227d8e379ef25d6f0f240f5ce8807c">
         </div>
         <div class="form-group">
-            <label for="nftId">ID Karakter / Pet #</label>
-            <input type="text" id="nftId" placeholder="Contoh: 1751215">
+            <label for="nftId">ID Karakter / Pet # (Di Pojok Kanan Atas)</label>
+            <input type="text" id="nftId" placeholder="Contoh: #1751215">
         </div>
         <div class="form-group">
-            <label for="imgUpload">Unggah Gambar NFT (Opsional)</label>
+            <label for="imgUpload">Unggah Screenshot / Foto NFT</label>
             <input type="file" id="imgUpload" accept="image/*">
         </div>
 
-        <button class="btn-analyze" onclick="analyzeNFT()">Analisis Kelangkaan & Makna Visual</button>
+        <button class="btn-analyze" onclick="startAnalysis()">Proses Analisis AI-AGI Kompleks</button>
     </div>
 
-    <!-- DASBOR HASIL ANALISIS -->
+    <!-- HASIL ANALISIS -->
     <div class="card result-container" id="resultCard">
-        <div class="card-title">Hasil Analisis Visual & Rarity Layer</div>
+        <!-- Bencana ID Aset di Pojok Kanan Atas -->
+        <div class="asset-id-badge" id="badgeAssetId">ID: #1751215</div>
+
+        <div class="card-title">Hasil Analisis Filosofis Aset</div>
+        <div class="ai-status">🤖 Processed by AI-AGI Deep Visual Engine (High Accuracy)</div>
         
         <div class="preview-box">
             <img id="nftPreviewImg" class="preview-img" src="" alt="NFT Preview">
-            <div id="nftTitle" style="font-size: 0.95rem; font-weight:600;">Pet Dog #1751215</div>
+            <div id="nftTitle" style="font-size: 1rem; font-weight:700;">Pet Dog #1751215</div>
         </div>
 
-        <div class="score-box">
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">Total Rarity Score</div>
-            <div class="score-value" id="scoreValue">245</div>
-            <div class="score-tier" id="scoreTier">SUPER RARE / MYTHICAL</div>
+        <div class="disclaimer">
+            * Catatan: Analisis berikut merupakan interpretasi dan apresiasi pribadi terhadap karya seni aset ini, sehingga bersifat subjektif dan tidak perlu diperdebatkan.
         </div>
 
-        <!-- RINCIAN ATRIBUT VISUAL DAN MAKNA -->
+        <!-- URAIAN FILOSOFI -->
         <div class="info-section">
-            <div class="info-title">Rincian Layer Atribut & Makna Filosofis</div>
-            <ul class="trait-list">
+            <div class="info-title">Makna & Filosofi Elemen Visual</div>
+            <ul class="trait-list" id="analysisContent">
                 <li class="trait-item">
-                    <div class="trait-header">
-                        <span>Base Body: Tubuh Abu-abu & Cakar Putih</span>
-                        <span style="color: var(--accent-color);">+20 pts</span>
-                    </div>
-                    <div class="trait-meaning"><b>Makna:</b> Keseimbangan, fondasi yang kokoh, netralitas, serta kebijaksanaan elemen bumi.</div>
+                    <div class="trait-header">Bentuk & Warna Tubuh (Base Body)</div>
+                    <div class="trait-meaning">Tubuh abu-abu melambangkan kepribadian yang tenang, netral, dan bijaksana. Cakar putih menandakan transparansi, niat bersih, dan pijakan langkah yang kokoh.</div>
                 </li>
                 <li class="trait-item">
-                    <div class="trait-header">
-                        <span>Face Pattern: Wajah Oranye Loreng & Pipi Merona</span>
-                        <span style="color: var(--accent-color);">+35 pts</span>
-                    </div>
-                    <div class="trait-meaning"><b>Makna:</b> Kehangatan, energi positif, keceriaan, dan karakter yang bersahabat.</div>
+                    <div class="trait-header">Corak & Riasan Wajah (Face Pattern)</div>
+                    <div class="trait-meaning">Aksen oranye loreng dengan rona pipi hangat mencerminkan energi ramah, optimisme, dan semangat hidup yang membara.</div>
                 </li>
                 <li class="trait-item">
-                    <div class="trait-header">
-                        <span>Eyes: Mata Besar & Pupil Vertikal (Flame Gaze)</span>
-                        <span style="color: var(--accent-color);">+40 pts (Rare)</span>
-                    </div>
-                    <div class="trait-meaning"><b>Makna:</b> Ketajaman intuisi, visi masa depan, keberanian, dan kewaspadaan penjaga.</div>
+                    <div class="trait-header">Bentuk & Tatapan Mata (Flame Gaze)</div>
+                    <div class="trait-meaning">Mata besar dengan pupil vertikal berwujud Flame Gaze mewakili intuisi tajam, visi masa depan, dan kewaspadaan penjaga yang tenang.</div>
                 </li>
                 <li class="trait-item">
-                    <div class="trait-header">
-                        <span>Headwear: Ornamen Hijau Bermotif (Dahi)</span>
-                        <span style="color: var(--accent-color);">+30 pts</span>
-                    </div>
-                    <div class="trait-meaning"><b>Makna:</b> Keharmonian spiritual, kedamaian pikiran, dan simbol pertumbuhan hidup.</div>
+                    <div class="trait-header">Mahkota Dahi & Alis (Headwear & Brow)</div>
+                    <div class="trait-meaning">Ornamen hijau di dahi melambangkan pusat pemikiran yang selaras dengan alam, kedamaian mental, dan pertumbuhan spiritual.</div>
                 </li>
                 <li class="trait-item">
-                    <div class="trait-header">
-                        <span>Ear Accessory: Ukiran Hitam Dekoratif Telinga</span>
-                        <span style="color: var(--accent-color);">+25 pts</span>
-                    </div>
-                    <div class="trait-meaning"><b>Makna:</b> Kepekaan dalam mendengarkan, kearifan lokal, serta estetika etnik.</div>
+                    <div class="trait-header">Ukiran Aksesori Telinga (Ear Accessory)</div>
+                    <div class="trait-meaning">Motif ukiran hitam menggambarkan kearifan etnik serta kepekaan dalam mendengarkan dan menyaring nasihat baik.</div>
                 </li>
                 <li class="trait-item">
-                    <div class="trait-header">
-                        <span>Tail: Rantai Koin Emas Kuno (Lucky Chain)</span>
-                        <span style="color: var(--accent-color);">+50 pts (Legendary)</span>
-                    </div>
-                    <div class="trait-meaning"><b>Makna:</b> Kemakmuran, kelimpahan rezeki, serta aliran keberuntungan yang tidak terputus.</div>
+                    <div class="trait-header">Kumis & Syal (Facial & Neckwear)</div>
+                    <div class="trait-meaning">Kumis melengkung dan syal pink menghadirkan perpaduan karakter berwibawa karismatik dengan kehangatan kasih sayang.</div>
                 </li>
                 <li class="trait-item">
-                    <div class="trait-header">
-                        <span>Neckwear: Kumis Lengkung & Syal Pink</span>
-                        <span style="color: var(--accent-color);">+30 pts</span>
-                    </div>
-                    <div class="trait-meaning"><b>Makna:</b> Perpaduan kewibawaan jenaka dengan kehangatan kasih sayang.</div>
+                    <div class="trait-header">Bentuk Ekor (Gold Coin Chain Tail)</div>
+                    <div class="trait-meaning">Rantai koin emas kuno merupakan simbol kemakmuran, kelimpahan rezeki, dan ikatan keberuntungan yang tak pernah terputus.</div>
                 </li>
                 <li class="trait-item">
-                    <div class="trait-header">
-                        <span>Background: Gradasi Biru Halus</span>
-                        <span style="color: var(--accent-color);">+15 pts</span>
-                    </div>
-                    <div class="trait-meaning"><b>Makna:</b> Ketenangan samudra, kedalaman teknologi, dan kepercayaan (trust).</div>
+                    <div class="trait-header">Latar Belakang (Background)</div>
+                    <div class="trait-meaning">Gradasi biru halus merepresentasikan kedalaman samudra pikiran, stabilitas, ketulusan, serta rasa percaya yang kuat.</div>
                 </li>
             </ul>
         </div>
 
         <!-- KESIMPULAN -->
         <div class="info-section">
-            <div class="info-title">Kesimpulan Karakter Aset</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
-                Aset NFT ini mengusung konsep <b>"Guardian of Fortune"</b> (Penjaga Kemakmuran). Perpaduan elemen visual unik seperti <i>Rantai Koin Emas</i> dan <i>Flame Gaze</i> menempatkannya dalam tingkatan koleksi yang sangat bernilai tinggi, baik dari segi estetika maupun filosofi simbolisnya.
+            <div class="info-title">Kesimpulan Karakter</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;" id="summaryText">
+                Secara keseluruhan, aset ini menggambarkan figur <b>"Guardian of Fortune"</b> (Penjaga Keharmonisan dan Kemakmuran). Terdapat keseimbangan kuat antara keberanian, kedamaian, dan simbol keberuntungan bagi kolektornya.
+            </div>
+        </div>
+
+        <!-- TINDALKAN COPY & SHARE MEDSOS -->
+        <div class="info-section">
+            <div class="info-title">Bagikan Hasil Analisis ke Media Sosial</div>
+            <button class="btn-action btn-copy" onclick="copyDescription()">📋 Salin Teks Deskripsi Analisis</button>
+            <div class="btn-group-share">
+                <a id="shareX" class="btn-action" target="_blank">Share ke X (Twitter)</a>
+                <a id="shareFB" class="btn-action" target="_blank">Share ke FB</a>
+                <a id="shareWA" class="btn-action" target="_blank">Share ke WhatsApp</a>
             </div>
         </div>
     </div>
@@ -318,8 +343,34 @@
 <script>
     const defaultSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='1.5'><rect width='24' height='24' fill='%231e293b'/><circle cx='12' cy='10' r='4'/><path d='M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6'/></svg>";
 
-    function analyzeNFT() {
-        const petId = document.getElementById('nftId').value.trim() || '1751215';
+    function startAnalysis() {
+        const hash = document.getElementById('nftHash').value.trim();
+        let petId = document.getElementById('nftId').value.trim();
+
+        if (!petId) {
+            petId = '#1751215';
+        } else if (!petId.startsWith('#')) {
+            petId = '#' + petId;
+        }
+
+        // Cek jika Hash pernah dianalisis
+        if (hash) {
+            const savedHistory = localStorage.getItem('nft_hash_' + hash);
+            if (savedHistory) {
+                const confirmReanalyze = confirm(`PEMBERITAHUAN:\nHash (${hash.substring(0, 10)}...) ini sudah PERNAH dianalisis sebelumnya.\n\nApakah Anda ingin menganalisis ulang?`);
+                if (!confirmReanalyze) {
+                    return; // Batal jika memilih No
+                }
+            }
+            // Simpan riwayat Hash
+            localStorage.setItem('nft_hash_' + hash, new Date().toISOString());
+        }
+
+        // Update ID di Pojok Kanan Atas Badge
+        document.getElementById('badgeAssetId').innerText = "ID Aset: " + petId;
+        document.getElementById('nftTitle').innerText = "Dog Pet " + petId;
+
+        // Tampilkan Preview Gambar
         const fileInput = document.getElementById('imgUpload');
         const imgElement = document.getElementById('nftPreviewImg');
 
@@ -333,8 +384,37 @@
             imgElement.src = defaultSvg;
         }
 
-        document.getElementById('nftTitle').innerText = "Dog Pet #" + petId;
+        // Siapkan Link Medsos
+        setupShareLinks(petId);
+
         document.getElementById('resultCard').style.display = 'block';
+    }
+
+    function copyDescription() {
+        const petId = document.getElementById('badgeAssetId').innerText;
+        const textToCopy = `[Hasil Analisis Aset NFT - ${petId}]\n` +
+            `*Catatan: Analisis pribadi, tidak perlu diperdebatkan.*\n\n` +
+            `• Tubuh: Abu-abu (Ketenangan & Ketenangan)\n` +
+            `• Wajah: Oranye Loreng (Energi & Ramah)\n` +
+            `• Mata: Flame Gaze (Intuisi & Visi Sharp)\n` +
+            `• Dahi: Mahkota Hijau (Kedamaian Spiritual)\n` +
+            `• Ekor: Rantai Koin Emas (Kemakmuran & Rezeki)\n` +
+            `• Latar: Biru (Stabilitas & Trust)\n\n` +
+            `Kesimpulan: Figur "Guardian of Fortune".\n` +
+            `Dianalisis oleh Nusantara NFT Analyzer AI-AGI.`;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert('Deskripsi analisis berhasil disalin ke Clipboard! Siap ditempel ke Medsos.');
+        });
+    }
+
+    function setupShareLinks(petId) {
+        const shareText = encodeURIComponent(`Lihat Hasil Analisis Filosofi NFT Aset ${petId} via Nusantara NFT Analyzer AI!`);
+        const pageUrl = encodeURIComponent(window.location.href);
+
+        document.getElementById('shareX').href = `https://twitter.com/intent/tweet?text=${shareText}&url=${pageUrl}`;
+        document.getElementById('shareFB').href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
+        document.getElementById('shareWA').href = `https://api.whatsapp.com/send?text=${shareText}%20${pageUrl}`;
     }
 </script>
 
