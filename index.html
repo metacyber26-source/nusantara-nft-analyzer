@@ -266,8 +266,8 @@
         <div class="card-title">Input Data & Parameter Aset</div>
         
         <div class="form-group">
-            <label for="nftHash">1. Input Hash / ID Aset NFT (Copy-Paste)</label>
-            <input type="text" id="nftHash" placeholder="Tempel Hash / ID (Contoh: Dog #156487)">
+            <label for="nftHash">1. Input ID Aset NFT / Hash</label>
+            <input type="text" id="nftHash" placeholder="Contoh: Dog #156487 atau #156487">
         </div>
 
         <div class="form-group">
@@ -371,26 +371,46 @@
 <script>
     const defaultSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='1.5'><rect width='24' height='24' fill='%231e293b'/><circle cx='12' cy='10' r='4'/><path d='M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6'/></svg>";
 
+    function extractCleanId(inputText) {
+        if (!inputText) return "Dog #156487";
+        
+        // Ambil pola nomor ID (misal: #156487 atau Dog #156487)
+        const matchWithPrefix = inputText.match(/([A-Za-z]+\s*#\d+)/);
+        if (matchWithPrefix) return matchWithPrefix[0];
+
+        const matchOnlyNumber = inputText.match(/#\d+/);
+        if (matchOnlyNumber) return "Aset " + matchOnlyNumber[0];
+
+        // Jika hanya memasukkan angka ID
+        if (/^\d+$/.test(inputText)) return "Aset #" + inputText;
+
+        // Jika input terlalu panjang (seperti hash acak), ambil 8 karakter pertama
+        if (inputText.length > 20) return "ID: " + inputText.substring(0, 8) + "...";
+
+        return inputText;
+    }
+
     function startAnalysis() {
-        const hash = document.getElementById('nftHash').value.trim();
+        const rawInput = document.getElementById('nftHash').value.trim();
+        const displayId = extractCleanId(rawInput);
 
-        let displayId = "Dog #156487";
-        if (hash) {
-            displayId = hash;
-
-            const savedHistory = localStorage.getItem('nft_hash_' + hash);
+        // Pengecekan Riwayat Hash/ID
+        if (rawInput) {
+            const savedHistory = localStorage.getItem('nft_id_' + rawInput);
             if (savedHistory) {
-                const confirmReanalyze = confirm(`PEMBERITAHUAN:\nHash/ID (${hash}) ini sudah PERNAH dianalisis sebelumnya.\n\nApakah Anda ingin menganalisis ulang?`);
+                const confirmReanalyze = confirm(`PEMBERITAHUAN:\nID/Hash (${displayId}) ini sudah PERNAH dianalisis sebelumnya.\n\nApakah Anda ingin menganalisis ulang?`);
                 if (!confirmReanalyze) {
                     return;
                 }
             }
-            localStorage.setItem('nft_hash_' + hash, new Date().toISOString());
+            localStorage.setItem('nft_id_' + rawInput, new Date().toISOString());
         }
 
+        // Tampilkan ID Ringkas di Badge dan Judul Seksi
         document.getElementById('badgeAssetId').innerText = displayId;
         document.getElementById('sectionTitle').innerText = `Makna Filosofi, Hongsui & Elemen Visual (${displayId})`;
 
+        // Pratinjau Foto NFT
         const nftFileInput = document.getElementById('imgUploadNFT');
         const nftImg = document.getElementById('nftPreviewImg');
         if (nftFileInput.files && nftFileInput.files[0]) {
@@ -401,6 +421,7 @@
             nftImg.src = defaultSvg;
         }
 
+        // Pratinjau Foto Properti
         const propsFileInput = document.getElementById('imgUploadProps');
         const propsImg = document.getElementById('propsPreviewImg');
         if (propsFileInput.files && propsFileInput.files[0]) {
