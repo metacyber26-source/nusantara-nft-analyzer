@@ -208,6 +208,19 @@
             font-size: 0.78rem;
         }
 
+        /* Disclaimer diletakkan setelah kesimpulan dengan jeda 2-3 baris */
+        .disclaimer {
+            font-size: 0.75rem;
+            font-style: italic;
+            color: var(--text-muted);
+            margin-top: 32px; /* Jarak 2-3 baris dari elemen atasnya */
+            margin-bottom: 16px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            border-left: 3px solid var(--warning-color);
+        }
+
         /* Share & Copy Buttons */
         .btn-group-share {
             display: flex;
@@ -239,16 +252,6 @@
             width: 100%;
             margin-top: 8px;
         }
-
-        .disclaimer {
-            font-size: 0.75rem;
-            font-style: italic;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            padding: 8px;
-            background-color: rgba(255,255,255,0.03);
-            border-radius: 6px;
-        }
     </style>
 </head>
 <body>
@@ -264,7 +267,7 @@
         
         <div class="form-group">
             <label for="nftHash">1. Input Hash / ID Aset NFT (Copy-Paste)</label>
-            <input type="text" id="nftHash" placeholder="Tempel Hash / ID (Contoh: #2320271 atau c2227d8e...)">
+            <input type="text" id="nftHash" placeholder="Tempel Hash / ID (Contoh: Dog #1114648 atau #2320271)">
         </div>
 
         <div class="form-group">
@@ -300,13 +303,9 @@
             </div>
         </div>
 
-        <div class="disclaimer">
-            * Catatan: Analisis berikut merupakan interpretasi dan apresiasi pribadi terhadap karya seni aset ini, sehingga bersifat subjektif dan tidak perlu diperdebatkan.
-        </div>
-
         <!-- URAIAN FILOSOFI & HONGSUI -->
         <div class="info-section">
-            <div class="info-title">Makna Filosofi, Hongsui & Elemen Visual</div>
+            <div class="info-title" id="sectionTitle">Makna Filosofi, Hongsui & Elemen Visual (Cat #2320271)</div>
             <ul class="trait-list" id="analysisContent">
                 <li class="trait-item">
                     <div class="trait-header">1. Tubuh (Body: Black)</div>
@@ -355,6 +354,11 @@
             </div>
         </div>
 
+        <!-- CATATAN DISCLAIMER (Dipeosat setelah kesimpulan dengan jarak 2-3 baris) -->
+        <div class="disclaimer">
+            Catatan: Analisis berikut merupakan interpretasi dan apresiasi pribadi terhadap karya seni aset ini, sehingga bersifat subjektif dan tidak perlu diperdebatkan.
+        </div>
+
         <!-- TOMBOL SHARE & COPY -->
         <div class="info-section">
             <div class="info-title">Bagikan Hasil Analisis ke Media Sosial</div>
@@ -374,17 +378,10 @@
     function startAnalysis() {
         const hash = document.getElementById('nftHash').value.trim();
 
-        // 1. Ekstrak atau Atur ID Aset dari input Hash jika ada
+        // 1. Ekstrak atau Atur ID Aset dari input Hash
         let displayId = "Cat #2320271";
         if (hash) {
-            if (hash.includes("#")) {
-                const matched = hash.match(/#\d+/);
-                if (matched) displayId = "Cat " + matched[0];
-            } else if (hash.length < 15) {
-                displayId = "ID: " + hash;
-            } else {
-                displayId = "Hash: " + hash.substring(0, 8) + "...";
-            }
+            displayId = hash;
 
             // Cek Riwayat Hash
             const savedHistory = localStorage.getItem('nft_hash_' + hash);
@@ -397,8 +394,9 @@
             localStorage.setItem('nft_hash_' + hash, new Date().toISOString());
         }
 
-        // Update Badge ID di Pojok Kanan Atas
+        // Update Badge ID & Judul Seksi
         document.getElementById('badgeAssetId').innerText = displayId;
+        document.getElementById('sectionTitle').innerText = `Makna Filosofi, Hongsui & Elemen Visual (${displayId})`;
 
         // 2. Load Preview Foto NFT Utama
         const nftFileInput = document.getElementById('imgUploadNFT');
@@ -431,8 +429,7 @@
 
     function copyDescription() {
         const assetId = document.getElementById('badgeAssetId').innerText;
-        const textToCopy = `[Hasil Analisis Filosofi & Hongsui NFT - ${assetId}]\n` +
-            `*Catatan: Analisis pribadi, tidak perlu diperdebatkan.*\n\n` +
+        const textToCopy = `Makna Filosofi, Hongsui & Elemen Visual (${assetId})\n\n` +
             `• Tubuh (Black): Elemen Air (Perlindungan & Potensi Rezeki)\n` +
             `• Wajah (Froggy): Energi Jin Chan (Penarik Kelimpahan)\n` +
             `• Mata (Flame Gaze): Elemen Api (Intuisi & Visi Tajam)\n` +
@@ -440,16 +437,16 @@
             `• Hidung (Cute): Wealth Filter (Manajemen Keuangan)\n` +
             `• Ekor (Torch/Coins): Aliran Rezeki Berkelanjutan\n` +
             `• Latar (Blue): Stabilitas & Ketenangan Jiwa\n\n` +
-            `Kesimpulan: Energi Yin-Yang Seimbang "Jin Chan Cat".\n` +
-            `Dianalisis oleh Nusantara NFT Analyzer AI-AGI.`;
+            `Kesimpulan: Energi Yin-Yang Seimbang "Jin Chan Cat".\n\n` +
+            `Catatan: Analisis berikut merupakan interpretasi dan apresiasi pribadi terhadap karya seni aset ini, sehingga bersifat subjektif dan tidak perlu diperdebatkan.`;
 
         navigator.clipboard.writeText(textToCopy).then(() => {
-            alert('Deskripsi analisis filosofi & hongsui berhasil disalin!');
+            alert('Deskripsi analisis berhasil disalin!');
         });
     }
 
     function setupShareLinks(assetId) {
-        const shareText = encodeURIComponent(`Lihat Analisis Filosofi & Hongsui Aset NFT ${assetId} via Nusantara NFT Analyzer!`);
+        const shareText = encodeURIComponent(`Makna Filosofi, Hongsui & Elemen Visual (${assetId}) via Nusantara NFT Analyzer!`);
         const pageUrl = encodeURIComponent(window.location.href);
 
         document.getElementById('shareX').href = `https://twitter.com/intent/tweet?text=${shareText}&url=${pageUrl}`;
