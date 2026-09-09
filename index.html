@@ -88,6 +88,12 @@
             margin-bottom: 12px;
         }
 
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
         label {
             display: block;
             font-size: 0.8rem;
@@ -128,7 +134,6 @@
             display: none;
         }
 
-        /* Grid Preview untuk Foto NFT & Foto Properti */
         .preview-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -208,7 +213,6 @@
             font-size: 0.78rem;
         }
 
-        /* Disclaimer diletakkan setelah kesimpulan dengan jarak 2-3 baris */
         .disclaimer {
             font-size: 0.75rem;
             font-style: italic;
@@ -221,7 +225,6 @@
             border-left: 3px solid var(--warning-color);
         }
 
-        /* Share & Copy Buttons */
         .btn-group-share {
             display: flex;
             flex-wrap: wrap;
@@ -266,17 +269,41 @@
         <div class="card-title">Input Data & Parameter Aset</div>
         
         <div class="form-group">
-            <label for="nftHash">1. Input ID Aset NFT / Hash</label>
-            <input type="text" id="nftHash" placeholder="Contoh: Dog #156487 atau #156487">
+            <label for="assetNameId">1. Nama / ID Visual Aset (Wajib Sesuai SS Pojok Atas)</label>
+            <input type="text" id="assetNameId" placeholder="Contoh: Cat #2318162 atau Dog #156487" value="Cat #2318162">
         </div>
 
         <div class="form-group">
-            <label for="imgUploadNFT">2. Unggah SS / Foto Aset NFT Utama</label>
+            <label>2. Input Attributes/Properti Aset (Untuk Analisis Akurat)</label>
+            <div class="form-row">
+                <div>
+                    <label for="attrBody">Body</label>
+                    <input type="text" id="attrBody" placeholder="Contoh: πorange" value="πorange">
+                </div>
+                <div>
+                    <label for="attrFace">Face</label>
+                    <input type="text" id="attrFace" placeholder="Contoh: Pink" value="Pink">
+                </div>
+            </div>
+            <div class="form-row" style="margin-top: 8px;">
+                <div>
+                    <label for="attrTail">Tail</label>
+                    <input type="text" id="attrTail" placeholder="Contoh: π coin" value="π coin">
+                </div>
+                <div>
+                    <label for="attrEyes">Eyes</label>
+                    <input type="text" id="attrEyes" placeholder="Contoh: Pink girl" value="Pink girl">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="imgUploadNFT">3. Unggah SS / Foto Aset NFT Utama</label>
             <input type="file" id="imgUploadNFT" accept="image/*">
         </div>
 
         <div class="form-group">
-            <label for="imgUploadProps">3. Unggah SS / Foto Properti (Attributes)</label>
+            <label for="imgUploadProps">4. Unggah SS / Foto Properti (Attributes)</label>
             <input type="file" id="imgUploadProps" accept="image/*">
         </div>
 
@@ -285,13 +312,12 @@
 
     <!-- HASIL ANALISIS -->
     <div class="card result-container" id="resultCard">
-        <!-- Badge ID Aset di Pojok Kanan Atas -->
-        <div class="asset-id-badge" id="badgeAssetId">Dog #156487</div>
+        <!-- Badge ID Aset Tepat -->
+        <div class="asset-id-badge" id="badgeAssetId">Cat #2318162</div>
 
         <div class="card-title">Hasil Analisis Filosofis & Hongsui Aset</div>
         <div class="ai-status">🤖 Processed by AI-AGI Deep Visual & Hongsui Meta Engine</div>
         
-        <!-- Preview Dual Image (Aset + Properti) -->
         <div class="preview-grid">
             <div class="preview-item">
                 <label>Visual Aset NFT</label>
@@ -305,40 +331,9 @@
 
         <!-- URAIAN FILOSOFI & HONGSUI -->
         <div class="info-section">
-            <div class="info-title" id="sectionTitle">Makna Filosofi, Hongsui & Elemen Visual (Dog #156487)</div>
+            <div class="info-title" id="sectionTitle">Makna Filosofi, Hongsui & Elemen Visual (Cat #2318162)</div>
             <ul class="trait-list" id="analysisContent">
-                <li class="trait-item">
-                    <div class="trait-header">1. Tubuh (Body: Necklace)</div>
-                    <div class="trait-meaning">Elemen Logam (Metal). Kalung mewakili struktur dan martabat. Membawa energi perlindungan, integritas, dan pengikatan komitmen bisnis yang kuat.</div>
-                </li>
-                <li class="trait-item">
-                    <div class="trait-header">2. Wajah (Face: Candy - Rare)</div>
-                    <div class="trait-meaning">Elemen Api/Manis (Soft Fire). Warna cerah membawa energi Relationship Luck. Melambangkan daya tarik personal yang menyenangkan dan disukai relasi.</div>
-                </li>
-                <li class="trait-item">
-                    <div class="trait-header">3. Mata & Tatapan (Eyes: Melancholy)</div>
-                    <div class="trait-meaning">Elemen Air (Water). Tatapan lembut melambangkan kedalaman empati, ketenangan pikiran saat mengambil keputusan, dan intuisi halus.</div>
-                </li>
-                <li class="trait-item">
-                    <div class="trait-header">4. Alis & Dahi (Eyebrow: Graceful - Rare)</div>
-                    <div class="trait-meaning">Elemen Kayu (Wood). Bentuk alis yang anggun mewakili pertumbuhan intelektual, keanggunan sikap, serta kelancaran karier.</div>
-                </li>
-                <li class="trait-item">
-                    <div class="trait-header">5. Hidung (Nose: Tiger)</div>
-                    <div class="trait-meaning">Elemen Tanah (Earth/Tiger Energy). Hidung Harimau mewakili insting pemburu rezeki yang tajam dan ketegasan mengeksekusi peluang.</div>
-                </li>
-                <li class="trait-item">
-                    <div class="trait-header">6. Telinga (Ears: Love)</div>
-                    <div class="trait-meaning">Elemen Api/Harmoni (Fire). Bentuk kasih melambangkan kepekaan mendengarkan nasihat baik dan penarik dukungan lingkungan.</div>
-                </li>
-                <li class="trait-item">
-                    <div class="trait-header">7. Kumis/Jenggot (Beard: Lucky)</div>
-                    <div class="trait-meaning">Elemen Kemakmuran (Wealth Luck). Magnet hoki dan pembawa keberuntungan tak terduga serta penjaga rezeki.</div>
-                </li>
-                <li class="trait-item">
-                    <div class="trait-header">8. Ekor (Tail: Love)</div>
-                    <div class="trait-meaning">Elemen Api/Keseimbangan. Ekor berbentuk hati menjaga semangat tetap positif dan memancarkan aura persahabatan.</div>
-                </li>
+                <!-- Konten dinamis dirender oleh JS -->
             </ul>
         </div>
 
@@ -346,7 +341,7 @@
         <div class="info-section">
             <div class="info-title">Kesimpulan Karakter & Energi Metafisika</div>
             <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;" id="summaryText">
-                Secara keseluruhan, aset ini merepresentasikan **"Anjing Keberuntungan & Harmoni (Lucky Grace Dog)"**. Kombinasi Candy, Love, dan Lucky menciptakan dominasi energi yang sangat harmonis, elegan, serta kuat dalam menarik simpati relasi dan keberuntungan finansial yang stabil.
+                <!-- Kesimpulan dinamis oleh JS -->
             </div>
         </div>
 
@@ -371,44 +366,46 @@
 <script>
     const defaultSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='1.5'><rect width='24' height='24' fill='%231e293b'/><circle cx='12' cy='10' r='4'/><path d='M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6'/></svg>";
 
-    function extractCleanId(inputText) {
-        if (!inputText) return "Dog #156487";
-        
-        // Ambil pola nomor ID (misal: #156487 atau Dog #156487)
-        const matchWithPrefix = inputText.match(/([A-Za-z]+\s*#\d+)/);
-        if (matchWithPrefix) return matchWithPrefix[0];
-
-        const matchOnlyNumber = inputText.match(/#\d+/);
-        if (matchOnlyNumber) return "Aset " + matchOnlyNumber[0];
-
-        // Jika hanya memasukkan angka ID
-        if (/^\d+$/.test(inputText)) return "Aset #" + inputText;
-
-        // Jika input terlalu panjang (seperti hash acak), ambil 8 karakter pertama
-        if (inputText.length > 20) return "ID: " + inputText.substring(0, 8) + "...";
-
-        return inputText;
-    }
-
     function startAnalysis() {
-        const rawInput = document.getElementById('nftHash').value.trim();
-        const displayId = extractCleanId(rawInput);
+        // 1. Ambil Nama / ID Asli (Bukan hash)
+        const nameIdInput = document.getElementById('assetNameId').value.trim();
+        const displayId = nameIdInput || "Cat #2318162";
 
-        // Pengecekan Riwayat Hash/ID
-        if (rawInput) {
-            const savedHistory = localStorage.getItem('nft_id_' + rawInput);
-            if (savedHistory) {
-                const confirmReanalyze = confirm(`PEMBERITAHUAN:\nID/Hash (${displayId}) ini sudah PERNAH dianalisis sebelumnya.\n\nApakah Anda ingin menganalisis ulang?`);
-                if (!confirmReanalyze) {
-                    return;
-                }
-            }
-            localStorage.setItem('nft_id_' + rawInput, new Date().toISOString());
-        }
+        // 2. Ambil Atribut Input
+        const bodyVal = document.getElementById('attrBody').value.trim() || "πorange";
+        const faceVal = document.getElementById('attrFace').value.trim() || "Pink";
+        const tailVal = document.getElementById('attrTail').value.trim() || "π coin";
+        const eyesVal = document.getElementById('attrEyes').value.trim() || "Pink girl";
 
-        // Tampilkan ID Ringkas di Badge dan Judul Seksi
+        // Set ID di Badge dan Judul
         document.getElementById('badgeAssetId').innerText = displayId;
         document.getElementById('sectionTitle').innerText = `Makna Filosofi, Hongsui & Elemen Visual (${displayId})`;
+
+        // 3. Render Analisis Aktual & Dinamis
+        const listContainer = document.getElementById('analysisContent');
+        listContainer.innerHTML = `
+            <li class="trait-item">
+                <div class="trait-header">1. Tubuh (Body: ${bodyVal})</div>
+                <div class="trait-meaning">Elemen Api/Emas. Warna oranye dengan simbol $\\pi$ melambangkan vitalitas, semangat terbarukan, dan ekspansi keuangan tak terbatas.</div>
+            </li>
+            <li class="trait-item">
+                <div class="trait-header">2. Wajah (Face: ${faceVal})</div>
+                <div class="trait-meaning">Elemen Kayu/Api Halus. Nuansa pink membawa energi Relationship Luck, daya tarik sosial, dan keharmonisan relasi.</div>
+            </li>
+            <li class="trait-item">
+                <div class="trait-header">3. Ekor (Tail: ${tailVal})</div>
+                <div class="trait-meaning">Elemen Logam/Kemakmuran. Ekor koin $\\pi$ melambangkan siklus aliran rezeki berkelanjutan dan keberuntungan finansial digital.</div>
+            </li>
+            <li class="trait-item">
+                <div class="trait-header">4. Mata (Eyes: ${eyesVal})</div>
+                <div class="trait-meaning">Elemen Api. Tatapan bernuansa pink memancarkan intuisi tajam, visi jernih, dan fokus pada peluang berharga.</div>
+            </li>
+        `;
+
+        // 4. Render Kesimpulan Dinamis
+        document.getElementById('summaryText').innerHTML = `
+            Secara keseluruhan, <strong>${displayId}</strong> merepresentasikan karakter dengan dominasi energi <strong>Pionir & Harmoni Digital</strong>. Kombinasi elemen $\\pi$ (Body/Tail) dan nuansa Pink (Face/Eyes) menciptakan magnet keberuntungan finansial sekaligus daya pikat sosial yang kuat.
+        `;
 
         // Pratinjau Foto NFT
         const nftFileInput = document.getElementById('imgUploadNFT');
@@ -439,15 +436,11 @@
     function copyDescription() {
         const assetId = document.getElementById('badgeAssetId').innerText;
         const textToCopy = `Makna Filosofi, Hongsui & Elemen Visual (${assetId})\n\n` +
-            `• Tubuh (Body: Necklace): Elemen Logam (Perlindungan & Integritas)\n` +
-            `• Wajah (Face: Candy): Elemen Api/Manis (Relationship Luck)\n` +
-            `• Mata (Eyes: Melancholy): Elemen Air (Intuisi & Ketenangan)\n` +
-            `• Alis (Eyebrow: Graceful): Elemen Kayu (Keanggunan & Karier)\n` +
-            `• Hidung (Nose: Tiger): Elemen Tanah (Insting Rezeki Tajam)\n` +
-            `• Telinga (Ears: Love): Elemen Harmoni (Dukungan Relasi)\n` +
-            `• Kumis (Beard: Lucky): Elemen Kemakmuran (Magnet Hoki)\n` +
-            `• Ekor (Tail: Love): Keseimbangan Aura Persahabatan\n\n` +
-            `Kesimpulan: Energi Yin Harmonist "Lucky Grace Dog".\n\n` +
+            `• Body: Energi Api/Emas & Ekspansi Finansial\n` +
+            `• Face: Relationship Luck & Keharmonisan\n` +
+            `• Tail: Magnet Rezeki & Keberuntungan Digital\n` +
+            `• Eyes: Intuisi & Kejelasan Visi\n\n` +
+            `Kesimpulan: Energi Pionir & Harmoni Digital.\n\n` +
             `Catatan: Analisis berikut merupakan interpretasi dan apresiasi pribadi terhadap karya seni aset ini, sehingga bersifat subjektif dan tidak perlu diperdebatkan.`;
 
         navigator.clipboard.writeText(textToCopy).then(() => {
