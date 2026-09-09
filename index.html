@@ -1,462 +1,107 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nusantara NFT Analyzer V6</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent-color: #6366f1;
-            --accent-hover: #4f46e5;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-        }
+import { GoogleGenAI, Type } from '@google/genai';
+import fs from 'fs';
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 16px;
-            display: flex;
-            justify-content: center;
-        }
+// Fungsi untuk konversi gambar lokal ke format inlineData
+function fileToGenerativePart(path, mimeType) {
+  return {
+    inlineData: {
+      data: Buffer.from(fs.readFileSync(path)).toString("base64"),
+      mimeType
+    },
+  };
+}
 
-        .container {
-            width: 100%;
-            max-width: 800px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        header h1 {
-            font-size: 1.4rem;
-            color: var(--text-color);
-            margin-bottom: 6px;
-        }
-
-        header p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            position: relative;
-        }
-
-        .card-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--accent-color);
-        }
-
-        .asset-id-badge {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background-color: rgba(99, 102, 241, 0.2);
-            color: var(--accent-color);
-            border: 1px solid var(--accent-color);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        label {
-            display: block;
-            font-size: 0.8rem;
-            margin-bottom: 4px;
-            color: var(--text-muted);
-        }
-
-        input[type="text"], input[type="file"] {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background-color: #0f172a;
-            color: var(--text-color);
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        button.btn-analyze {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            background-color: var(--accent-color);
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 8px;
-        }
-
-        button.btn-analyze:hover {
-            background-color: var(--accent-hover);
-        }
-
-        .result-container {
-            display: none;
-        }
-
-        .preview-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .preview-item {
-            text-align: center;
-            background-color: #0f172a;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .preview-item label {
-            font-size: 0.75rem;
-            color: var(--warning-color);
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-
-        .preview-img {
-            width: 100%;
-            max-height: 180px;
-            object-fit: contain;
-            border-radius: 6px;
-            background-color: #1e293b;
-        }
-
-        .ai-status {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--success-color);
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-
-        .info-section {
-            background-color: #0f172a;
-            border-radius: 8px;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            margin-top: 12px;
-        }
-
-        .info-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--warning-color);
-            margin-bottom: 8px;
-        }
-
-        .trait-list {
-            list-style: none;
-        }
-
-        .trait-item {
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.8rem;
-            line-height: 1.4;
-        }
-
-        .trait-item:last-child {
-            border-bottom: none;
-        }
-
-        .trait-header {
-            font-weight: 600;
-            color: var(--text-color);
-            margin-bottom: 2px;
-        }
-
-        .trait-meaning {
-            color: var(--text-muted);
-            font-size: 0.78rem;
-        }
-
-        .disclaimer {
-            font-size: 0.75rem;
-            font-style: italic;
-            color: var(--text-muted);
-            margin-top: 32px;
-            margin-bottom: 16px;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.03);
-            border-radius: 6px;
-            border-left: 3px solid var(--warning-color);
-        }
-
-        .btn-group-share {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .btn-action {
-            flex: 1;
-            min-width: 120px;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background-color: #0f172a;
-            color: var(--text-color);
-            font-size: 0.78rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-copy {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-            color: white;
-            width: 100%;
-            margin-top: 8px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <header>
-        <h1>Nusantara NFT Analyzer V6</h1>
-        <p>Analisis Filosofi, Hongsui & Metafisika Visual AI-AGI</p>
-    </header>
-
-    <div class="card">
-        <div class="card-title">Input Data & Parameter Aset</div>
-        
-        <div class="form-group">
-            <label for="assetNameId">1. Nama / ID Visual Aset (Wajib Sesuai SS Pojok Atas)</label>
-            <input type="text" id="assetNameId" placeholder="Contoh: Cat #2318162 atau Dog #156487" value="Cat #2318162">
-        </div>
-
-        <div class="form-group">
-            <label>2. Input Attributes/Properti Aset (Untuk Analisis Akurat)</label>
-            <div class="form-row">
-                <div>
-                    <label for="attrBody">Body</label>
-                    <input type="text" id="attrBody" placeholder="Contoh: πorange" value="πorange">
-                </div>
-                <div>
-                    <label for="attrFace">Face</label>
-                    <input type="text" id="attrFace" placeholder="Contoh: Pink" value="Pink">
-                </div>
-            </div>
-            <div class="form-row" style="margin-top: 8px;">
-                <div>
-                    <label for="attrTail">Tail</label>
-                    <input type="text" id="attrTail" placeholder="Contoh: π coin" value="π coin">
-                </div>
-                <div>
-                    <label for="attrEyes">Eyes</label>
-                    <input type="text" id="attrEyes" placeholder="Contoh: Pink girl" value="Pink girl">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="imgUploadNFT">3. Unggah SS / Foto Aset NFT Utama</label>
-            <input type="file" id="imgUploadNFT" accept="image/*">
-        </div>
-
-        <div class="form-group">
-            <label for="imgUploadProps">4. Unggah SS / Foto Properti (Attributes)</label>
-            <input type="file" id="imgUploadProps" accept="image/*">
-        </div>
-
-        <button class="btn-analyze" onclick="startAnalysis()">Proses Analisis AI-AGI & Hongsui</button>
-    </div>
-
-    <!-- HASIL ANALISIS -->
-    <div class="card result-container" id="resultCard">
-        <!-- Badge ID Aset Tepat -->
-        <div class="asset-id-badge" id="badgeAssetId">Cat #2318162</div>
-
-        <div class="card-title">Hasil Analisis Filosofis & Hongsui Aset</div>
-        <div class="ai-status">🤖 Processed by AI-AGI Deep Visual & Hongsui Meta Engine</div>
-        
-        <div class="preview-grid">
-            <div class="preview-item">
-                <label>Visual Aset NFT</label>
-                <img id="nftPreviewImg" class="preview-img" src="" alt="NFT Preview">
-            </div>
-            <div class="preview-item">
-                <label>Data Properti / Attributes</label>
-                <img id="propsPreviewImg" class="preview-img" src="" alt="Props Preview">
-            </div>
-        </div>
-
-        <!-- URAIAN FILOSOFI & HONGSUI -->
-        <div class="info-section">
-            <div class="info-title" id="sectionTitle">Makna Filosofi, Hongsui & Elemen Visual (Cat #2318162)</div>
-            <ul class="trait-list" id="analysisContent">
-                <!-- Konten dinamis dirender oleh JS -->
-            </ul>
-        </div>
-
-        <!-- KESIMPULAN -->
-        <div class="info-section">
-            <div class="info-title">Kesimpulan Karakter & Energi Metafisika</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;" id="summaryText">
-                <!-- Kesimpulan dinamis oleh JS -->
-            </div>
-        </div>
-
-        <!-- CATATAN DISCLAIMER -->
-        <div class="disclaimer">
-            Catatan: Analisis berikut merupakan interpretasi dan apresiasi pribadi terhadap karya seni aset ini, sehingga bersifat subjektif dan tidak perlu diperdebatkan.
-        </div>
-
-        <!-- TOMBOL SHARE & COPY -->
-        <div class="info-section">
-            <div class="info-title">Bagikan Hasil Analisis ke Media Sosial</div>
-            <button class="btn-action btn-copy" onclick="copyDescription()">📋 Salin Teks Deskripsi Analisis</button>
-            <div class="btn-group-share">
-                <a id="shareX" class="btn-action" target="_blank">Share ke X (Twitter)</a>
-                <a id="shareFB" class="btn-action" target="_blank">Share ke FB</a>
-                <a id="shareWA" class="btn-action" target="_blank">Share ke WhatsApp</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const defaultSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='1.5'><rect width='24' height='24' fill='%231e293b'/><circle cx='12' cy='10' r='4'/><path d='M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6'/></svg>";
-
-    function startAnalysis() {
-        // 1. Ambil Nama / ID Asli (Bukan hash)
-        const nameIdInput = document.getElementById('assetNameId').value.trim();
-        const displayId = nameIdInput || "Cat #2318162";
-
-        // 2. Ambil Atribut Input
-        const bodyVal = document.getElementById('attrBody').value.trim() || "πorange";
-        const faceVal = document.getElementById('attrFace').value.trim() || "Pink";
-        const tailVal = document.getElementById('attrTail').value.trim() || "π coin";
-        const eyesVal = document.getElementById('attrEyes').value.trim() || "Pink girl";
-
-        // Set ID di Badge dan Judul
-        document.getElementById('badgeAssetId').innerText = displayId;
-        document.getElementById('sectionTitle').innerText = `Makna Filosofi, Hongsui & Elemen Visual (${displayId})`;
-
-        // 3. Render Analisis Aktual & Dinamis
-        const listContainer = document.getElementById('analysisContent');
-        listContainer.innerHTML = `
-            <li class="trait-item">
-                <div class="trait-header">1. Tubuh (Body: ${bodyVal})</div>
-                <div class="trait-meaning">Elemen Api/Emas. Warna oranye dengan simbol $\\pi$ melambangkan vitalitas, semangat terbarukan, dan ekspansi keuangan tak terbatas.</div>
-            </li>
-            <li class="trait-item">
-                <div class="trait-header">2. Wajah (Face: ${faceVal})</div>
-                <div class="trait-meaning">Elemen Kayu/Api Halus. Nuansa pink membawa energi Relationship Luck, daya tarik sosial, dan keharmonisan relasi.</div>
-            </li>
-            <li class="trait-item">
-                <div class="trait-header">3. Ekor (Tail: ${tailVal})</div>
-                <div class="trait-meaning">Elemen Logam/Kemakmuran. Ekor koin $\\pi$ melambangkan siklus aliran rezeki berkelanjutan dan keberuntungan finansial digital.</div>
-            </li>
-            <li class="trait-item">
-                <div class="trait-header">4. Mata (Eyes: ${eyesVal})</div>
-                <div class="trait-meaning">Elemen Api. Tatapan bernuansa pink memancarkan intuisi tajam, visi jernih, dan fokus pada peluang berharga.</div>
-            </li>
-        `;
-
-        // 4. Render Kesimpulan Dinamis
-        document.getElementById('summaryText').innerHTML = `
-            Secara keseluruhan, <strong>${displayId}</strong> merepresentasikan karakter dengan dominasi energi <strong>Pionir & Harmoni Digital</strong>. Kombinasi elemen $\\pi$ (Body/Tail) dan nuansa Pink (Face/Eyes) menciptakan magnet keberuntungan finansial sekaligus daya pikat sosial yang kuat.
-        `;
-
-        // Pratinjau Foto NFT
-        const nftFileInput = document.getElementById('imgUploadNFT');
-        const nftImg = document.getElementById('nftPreviewImg');
-        if (nftFileInput.files && nftFileInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) { nftImg.src = e.target.result; }
-            reader.readAsDataURL(nftFileInput.files[0]);
-        } else {
-            nftImg.src = defaultSvg;
-        }
-
-        // Pratinjau Foto Properti
-        const propsFileInput = document.getElementById('imgUploadProps');
-        const propsImg = document.getElementById('propsPreviewImg');
-        if (propsFileInput.files && propsFileInput.files[0]) {
-            const reader2 = new FileReader();
-            reader2.onload = function(e) { propsImg.src = e.target.result; }
-            reader2.readAsDataURL(propsFileInput.files[0]);
-        } else {
-            propsImg.src = defaultSvg;
-        }
-
-        setupShareLinks(displayId);
-        document.getElementById('resultCard').style.display = 'block';
+// Schema agar output AI selalu terstruktur dan obyektif
+const analysisSchema = {
+  type: Type.OBJECT,
+  properties: {
+    visualDescription: {
+      type: Type.STRING,
+      description: "Deskripsi obyektif visual secara keseluruhan."
+    },
+    elementsAnalysis: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          part: { 
+            type: Type.STRING, 
+            description: "Bagian gambar: body, face, tail, eyes, eyebrow, nose, ears, beard, atau background" 
+          },
+          attributesFound: {
+            type: Type.OBJECT,
+            properties: {
+              shape: { type: Type.STRING, description: "Bentuk yang terdeteksi secara fisik pada gambar" },
+              motif: { type: Type.STRING, description: "Motif atau tekstur yang terlihat" },
+              color: { type: Type.STRING, description: "Warna dominan atau aksen" }
+            },
+            required: ["shape", "motif", "color"]
+          },
+          philosophicalMeaning: { 
+            type: Type.STRING, 
+            description: "Arti filosofis berdasarkan bentuk, motif, dan warna spesifik bagian ini." 
+          },
+          fengShuiAnalysis: { 
+            type: Type.STRING, 
+            description: "Analisis fengshui (elemen 5 unsur, aliran qi, simbolisme keberuntungan/keseimbangan)." 
+          }
+        },
+        required: ["part", "attributesFound", "philosophicalMeaning", "fengShuiAnalysis"]
+      }
     }
+  },
+  required: ["visualDescription", "elementsAnalysis"]
+};
 
-    function copyDescription() {
-        const assetId = document.getElementById('badgeAssetId').innerText;
-        const textToCopy = `Makna Filosofi, Hongsui & Elemen Visual (${assetId})\n\n` +
-            `• Body: Energi Api/Emas & Ekspansi Finansial\n` +
-            `• Face: Relationship Luck & Keharmonisan\n` +
-            `• Tail: Magnet Rezeki & Keberuntungan Digital\n` +
-            `• Eyes: Intuisi & Kejelasan Visi\n\n` +
-            `Kesimpulan: Energi Pionir & Harmoni Digital.\n\n` +
-            `Catatan: Analisis berikut merupakan interpretasi dan apresiasi pribadi terhadap karya seni aset ini, sehingga bersifat subjektif dan tidak perlu diperdebatkan.`;
+async function analyzeImage(imagePath, mimeType) {
+  const imagePart = fileToGenerativePart(imagePath, mimeType);
 
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            alert('Deskripsi analisis berhasil disalin!');
-        });
-    }
+  const prompt = `
+    Bertindaklah sebagai ahli semiotika, filosofi visual, dan praktisi Fengshui profesional.
+    Tugasmu adalah menganalisis GAMBAR INI SECARA OBYEKTIF berdasarkan apa yang benar-benar terlihat.
+    
+    Analisis elemen-elemen berikut jika ada pada gambar:
+    1. Body (Tubuh)
+    2. Face (Wajah)
+    3. Tail (Ekor)
+    4. Eyes (Mata)
+    5. Eyebrow (Alis)
+    6. Nose (Hidung)
+    7. Ears (Telinga)
+    8. Beard (Janggut/Kumis)
+    9. Background (Latar Belakang)
 
-    function setupShareLinks(assetId) {
-        const shareText = encodeURIComponent(`Makna Filosofi, Hongsui & Elemen Visual (${assetId}) via Nusantara NFT Analyzer!`);
-        const pageUrl = encodeURIComponent(window.location.href);
+    Untuk setiap elemen yang ditemukan:
+    - Identifikasi spesifik **Bentuk (Shape)**, **Motif/Tekstur (Motif)**, dan **Warna (Color)** yang nyata terlihat pada gambar.
+    - Berikan **Arti Filosofis** yang relevan dengan bentuk, motif, dan warna tersebut.
+    - Berikan **Analisis Fengshui** (misal: keterkaitan dengan 5 Elemen Wood/Fire/Earth/Metal/Water, simbol rezeki, proteksi, atau keseimbangan energi).
+    
+    Catatan Penting:
+    - Beda visual wajib menghasilkan beda interpretasi.
+    - Jika suatu elemen tidak ada di dalam gambar (misal: tidak ada ekor/tail), abaikan elemen tersebut.
+  `;
 
-        document.getElementById('shareX').href = `https://twitter.com/intent/tweet?text=${shareText}&url=${pageUrl}`;
-        document.getElementById('shareFB').href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
-        document.getElementById('shareWA').href = `https://api.whatsapp.com/send?text=${shareText}%20${pageUrl}`;
-    }
-</script>
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [prompt, imagePart],
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: analysisSchema,
+        temperature: 0.2, // Temperature rendah agar hasil konsisten dan obyektif
+      }
+    });
 
-</body>
-</html>
+    const result = JSON.parse(response.text);
+    return result;
+  } catch (error) {
+    console.error("Gagal menganalisis gambar:", error);
+  }
+}
+
+// Cara Penggunaan
+analyzeImage("./sampel_gambar.png", "image/png").then((data) => {
+  console.log(JSON.stringify(data, null, 2));
+});
