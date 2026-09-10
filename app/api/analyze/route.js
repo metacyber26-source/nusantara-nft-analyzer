@@ -28,12 +28,7 @@ export async function POST(req) {
     const base64Image = buffer.toString("base64");
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    
-    // NAMA MODEL WAJIB: "gemini-1.5-flash"
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: { responseMimeType: "application/json" }
-    });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
     Kamu adalah seorang pakar Semiotika Seni, Filosofi Budaya, dan Praktisi Fengshui Visual profesional.
@@ -72,10 +67,21 @@ export async function POST(req) {
       },
     ]);
 
-    const responseText = result.response.text();
-    const parsedData = JSON.parse(responseText);
+    let responseText = result.response.text();
+    
+    // Pembersihan String JSON
+    responseText = responseText.replace(/```json|```/g, "").trim();
 
-    return NextResponse.json(parsedData);
+    try {
+      const parsedData = JSON.parse(responseText);
+      return NextResponse.json(parsedData);
+    } catch (jsonErr) {
+      return NextResponse.json(
+        { error: "Respon dari Gemini bukan JSON valid: " + responseText },
+        { status: 500 }
+      );
+    }
+
   } catch (error) {
     console.error("Analysis error:", error);
     return NextResponse.json(
