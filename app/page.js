@@ -1,27 +1,23 @@
 "use client";
-
 import { useState } from "react";
-import { Upload, FileCode, Check, Copy, Download, RefreshCw } from "lucide-react";
 
 export default function Home() {
-  const [imagePreview, setImagePreview] = useState(null);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [copied, setCopied] = useState(false);
 
-  const handleImageChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setImagePreview(URL.createObjectURL(selectedFile));
-      setResult(null);
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
     }
   };
 
-  const handleAnalyze = async () => {
-    if (!file) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!file) return alert("Pilih file terlebih dahulu!");
+
     setLoading(true);
+    setResult(null);
 
     const formData = new FormData();
     formData.append("image", file);
@@ -35,131 +31,44 @@ export default function Home() {
       const data = await res.json();
       setResult(data);
     } catch (err) {
-      alert("Terjadi kesalahan saat menganalisis gambar.");
+      setResult({ error: err.message || "Gagal menghubungi server." });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCopyJSON = () => {
-    if (!result) return;
-    navigator.clipboard.writeText(JSON.stringify(result, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleDownloadJSON = () => {
-    if (!result) return;
-    const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `nft-analysis-${Date.now()}.json`;
-    a.click();
-  };
-
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <header className="text-center space-y-2 border-b border-slate-800 pb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-amber-400">
-          NFT Semiotics & Fengshui Visual Analyzer
-        </h1>
-        <p className="text-slate-400 text-sm max-w-2xl mx-auto">
-          Menganalisis elemen visual NFT secara aktual berbasis Filosofi Budaya, Semiotika Seni, dan Fengshui Visual terstruktur.
-        </p>
-      </header>
+    <main className="min-h-screen bg-slate-900 text-white p-4 sm:p-8 max-w-4xl mx-auto overflow-x-hidden">
+      <h1 className="text-2xl font-bold mb-4">NFT Semiotics & Fengshui Analyzer</h1>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Panel Upload */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Upload className="w-5 h-5 text-amber-400" /> Upload Gambar NFT
-          </h2>
-
-          <div className="border-2 border-dashed border-slate-700 hover:border-amber-500/50 transition rounded-xl p-6 text-center flex flex-col items-center justify-center min-h-[260px] relative">
-            {imagePreview ? (
-              <img
-                src={imagePreview}
-                alt="NFT Preview"
-                className="max-h-60 rounded-lg object-contain"
-              />
-            ) : (
-              <div className="space-y-2 text-slate-400">
-                <Upload className="w-10 h-10 mx-auto text-slate-500" />
-                <p className="text-sm">Klik atau seret gambar NFT ke sini</p>
-                <p className="text-xs text-slate-500">PNG, JPG, WEBP hingga 10MB</p>
-              </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </div>
-
-          <button
-            onClick={handleAnalyze}
-            disabled={!file || loading}
-            className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <RefreshCw className="w-5 h-5 animate-spin" />
-                Menganalisis Fitur Visual...
-              </>
-            ) : (
-              "Mulai Analisis Semiotika & Fengshui"
-            )}
-          </button>
+      <form onSubmit={handleSubmit} className="mb-6 space-y-4">
+        <div>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="block w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700"
+          />
         </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-600 text-white font-medium py-2 px-4 rounded-md transition"
+        >
+          {loading ? "Menganalisis..." : "Mulai Analisis Semiotika & Fengshui"}
+        </button>
+      </form>
 
-        {/* Panel Output JSON */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4 flex flex-col">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <FileCode className="w-5 h-5 text-amber-400" /> Hasil Analisis (Format JSON)
-            </h2>
-            {result && (
-              <div className="flex gap-2">
-                <button
-                  onClick={handleCopyJSON}
-                  className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition"
-                  title="Salin JSON"
-                >
-                  {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-                </button>
-                <button
-                  onClick={handleDownloadJSON}
-                  className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition"
-                  title="Unduh JSON"
-                >
-                  <Download className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-xs overflow-x-auto text-emerald-400 max-h-[400px]">
-            {result ? (
-              <pre>{JSON.stringify(result, null, 2)}</pre>
-            ) : (
-              <span className="text-slate-600">
-                JSON output analisis akan muncul di sini setelah gambar diproses...
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Tampilan Disclaimer */}
-      {result && result.disclaimer && (
-        <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300/90 text-xs text-center">
-          {result.disclaimer}
+      {result && (
+        <div className="mt-6 bg-slate-800 p-4 rounded-lg border border-slate-700 max-w-full overflow-hidden">
+          <h2 className="text-lg font-semibold mb-2">Hasil Analisis (Format JSON)</h2>
+          
+          {/* Bagian ini yang membuat teks tidak memanjang ke samping */}
+          <pre className="bg-slate-950 p-4 rounded text-sm font-mono text-green-400 whitespace-pre-wrap break-words overflow-x-auto max-w-full">
+            {JSON.stringify(result, null, 2)}
+          </pre>
         </div>
       )}
-    </div>
+    </main>
   );
 }
