@@ -1,7 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-// Mengatur timeout Vercel ke 60 detik
 export const maxDuration = 60;
 
 export async function POST(req) {
@@ -19,7 +18,7 @@ export async function POST(req) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY belum dikonfigurasi." },
+        { error: "GEMINI_API_KEY belum dikonfigurasi di Environment Variables Vercel." },
         { status: 500 }
       );
     }
@@ -29,8 +28,11 @@ export async function POST(req) {
     const base64Image = buffer.toString("base64");
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // Menggunakan gemini-1.5-flash agar pemrosesan gambar jauh lebih cepat
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      // Memaksa model mengembalikan JSON murni
+      generationConfig: { responseMimeType: "application/json" } 
+    });
 
     const prompt = `
     Kamu adalah seorang pakar Semiotika Seni, Filosofi Budaya, dan Praktisi Fengshui Visual profesional.
@@ -42,7 +44,7 @@ export async function POST(req) {
     2. Untuk setiap elemen, berikan "visual_features", "filosofi", dan "fengshui".
     3. DI AKHIR (field "disclaimer"), WAJIB menyantumkan kalimat eksak ini:
        "Analisis ini merupakan pendapat pribadi berbasis interpretasi filosofi dan fengshui visual, serta dapat berbeda dengan pandangan pihak lain. Hasil analisis ini bersifat informatif, tidak perlu diperdebatkan, dan tidak wajib diyakini."
-    4. Kembalikan Jawaban HANYA berupa JSON valid sesuai skema berikut tanpa tanda markdown backtick:
+    4. Kembalikan Jawaban HANYA berupa JSON valid sesuai skema berikut:
     {
       "elements": {
         "body": { "visual_features": "...", "filosofi": "...", "fengshui": "..." },
@@ -70,14 +72,20 @@ export async function POST(req) {
     ]);
 
     const responseText = result.response.text();
-    const cleanJSON = responseText.replace(/```json|```/g, "").trim();
-    const parsedData = JSON.parse(cleanJSON);
+    
+    // Pembersihan tambahan jika ada karakter di luar blok JSON
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("Respon AI tidak mengandung JSON valid.");
+    }
 
+    const parsedData = JSON.parse(jsonMatch[0]);
     return NextResponse.json(parsedData);
+
   } catch (error) {
     console.error("Analysis error:", error);
     return NextResponse.json(
-      { error: "Gagal menganalisis gambar secara real-time." },
+      { error: error.message || "Gagal menganalisis gambar secara real-time." },
       { status: 500 }
     );
   }
