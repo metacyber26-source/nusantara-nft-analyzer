@@ -18,7 +18,7 @@ export async function POST(req) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY belum dikonfigurasi di Environment Variables Vercel." },
+        { error: "GEMINI_API_KEY belum dikonfigurasi di Vercel." },
         { status: 500 }
       );
     }
@@ -28,10 +28,11 @@ export async function POST(req) {
     const base64Image = buffer.toString("base64");
 
     const genAI = new GoogleGenerativeAI(apiKey);
+    
+    // NAMA MODEL WAJIB: "gemini-1.5-flash"
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash",
-      // Memaksa model mengembalikan JSON murni
-      generationConfig: { responseMimeType: "application/json" } 
+      generationConfig: { responseMimeType: "application/json" }
     });
 
     const prompt = `
@@ -72,20 +73,13 @@ export async function POST(req) {
     ]);
 
     const responseText = result.response.text();
-    
-    // Pembersihan tambahan jika ada karakter di luar blok JSON
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Respon AI tidak mengandung JSON valid.");
-    }
+    const parsedData = JSON.parse(responseText);
 
-    const parsedData = JSON.parse(jsonMatch[0]);
     return NextResponse.json(parsedData);
-
   } catch (error) {
     console.error("Analysis error:", error);
     return NextResponse.json(
-      { error: error.message || "Gagal menganalisis gambar secara real-time." },
+      { error: error.message || "Gagal menganalisis gambar." },
       { status: 500 }
     );
   }
