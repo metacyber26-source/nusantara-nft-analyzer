@@ -1,6 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
+// Mengatur timeout Vercel ke 60 detik
+export const maxDuration = 60;
+
 export async function POST(req) {
   try {
     const formData = await req.formData();
@@ -13,21 +16,20 @@ export async function POST(req) {
       );
     }
 
-    // Ambil API Key dari Vercel Environment Variables
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY belum dikonfigurasi di Vercel." },
+        { error: "GEMINI_API_KEY belum dikonfigurasi." },
         { status: 500 }
       );
     }
 
-    // Konversi file gambar ke format Base64 untuk AI
     const bytes = await image.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const base64Image = buffer.toString("base64");
 
     const genAI = new GoogleGenerativeAI(apiKey);
+    // Menggunakan gemini-1.5-flash agar pemrosesan gambar jauh lebih cepat
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
