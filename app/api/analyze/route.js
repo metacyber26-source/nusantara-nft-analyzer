@@ -27,7 +27,8 @@ export async function POST(req) {
     const buffer = Buffer.from(bytes);
     const base64Image = buffer.toString("base64");
 
-    const genAI = new GoogleGenerativeAI(apiKey);
+    // Menentukan apiVersion secara eksplisit ke 'v1'
+    const genAI = new GoogleGenerativeAI(apiKey, { apiVersion: "v1" });
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
@@ -68,19 +69,10 @@ export async function POST(req) {
     ]);
 
     let responseText = result.response.text();
-    
-    // Pembersihan String JSON
     responseText = responseText.replace(/```json|```/g, "").trim();
 
-    try {
-      const parsedData = JSON.parse(responseText);
-      return NextResponse.json(parsedData);
-    } catch (jsonErr) {
-      return NextResponse.json(
-        { error: "Respon dari Gemini bukan JSON valid: " + responseText },
-        { status: 500 }
-      );
-    }
+    const parsedData = JSON.parse(responseText);
+    return NextResponse.json(parsedData);
 
   } catch (error) {
     console.error("Analysis error:", error);
