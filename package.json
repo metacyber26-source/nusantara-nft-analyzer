@@ -1,6 +1,6 @@
 {
   "name": "nft-semiotics-analyzer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.13.0",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.378.0",
     "next": "^14.2.0",
     "react": "^18.3.0",
@@ -21,4 +22,3 @@
     "tailwindcss": "^3.4.3"
   }
 }
-
