@@ -96,7 +96,7 @@ export default function Home() {
 
       {/* Pesan Error */}
       {errorMsg && (
-        <div className="mt-6 p-4 bg-red-950/80 border border-red-800 rounded-xl text-red-200 text-xs leading-relaxed break-words">
+        <div className="mt-6 p-4 bg-red-950/80 border border-red-800 rounded-xl text-red-200 text-xs leading-relaxed break-words whitespace-pre-wrap">
           <p className="font-bold mb-1">Gagal Menganalisis:</p>
           <p>{errorMsg}</p>
         </div>
@@ -119,19 +119,19 @@ export default function Home() {
                   </h3>
 
                   {item.visual_features && (
-                    <p className="text-xs text-slate-300">
+                    <p className="text-xs text-slate-300 leading-relaxed">
                       <strong className="text-slate-200">Fitur Visual:</strong> {item.visual_features}
                     </p>
                   )}
 
                   {item.filosofi && (
-                    <p className="text-xs text-slate-300">
+                    <p className="text-xs text-slate-300 leading-relaxed">
                       <strong className="text-slate-200">Filosofi:</strong> {item.filosofi}
                     </p>
                   )}
 
                   {item.fengshui && (
-                    <p className="text-xs text-slate-300">
+                    <p className="text-xs text-slate-300 leading-relaxed">
                       <strong className="text-slate-200">Fengshui:</strong> {item.fengshui}
                     </p>
                   )}
