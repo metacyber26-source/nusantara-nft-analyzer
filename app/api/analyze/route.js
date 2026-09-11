@@ -28,22 +28,22 @@ export async function POST(req) {
     const base64Image = buffer.toString("base64");
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    
-    // Menggunakan string model gemini-3.6-flash sesuai instruksi resmi Google API
     const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
 
     const prompt = `
     Kamu adalah seorang pakar Semiotika Seni, Filosofi Budaya, dan Praktisi Fengshui Visual profesional.
     Tugas utamanya adalah menganalisis gambar NFT ini secara spesifik, aktual, detail, dan canggih berdasarkan fitur visual nyata yang ada pada gambar.
 
-    INSTRUKSI:
-    1. Bedah elemen-elemen berikut satu per satu (bentuk, motif, warna):
+    INSTRUKSI UTAMA:
+    1. Coba baca dan ekstrak **Asset ID / Token ID** yang tertulis pada gambar (terutama teks di pojok kanan atas, contoh: "Cat🐱#2353448" atau "#2353448"). Jika tidak ada, isi "Tidak Terdeteksi".
+    2. Bedah elemen-elemen berikut satu per satu (bentuk, motif, warna):
        - body, face, tail, eyes, eyebrow, nose, ears, beard, background.
-    2. Untuk setiap elemen, berikan "visual_features", "filosofi", dan "fengshui".
-    3. DI AKHIR (field "disclaimer"), WAJIB menyantumkan kalimat eksak ini:
+    3. Untuk setiap elemen, berikan "visual_features", "filosofi", dan "fengshui".
+    4. DI AKHIR (field "disclaimer"), WAJIB menyantumkan kalimat eksak ini:
        "Analisis ini merupakan pendapat pribadi berbasis interpretasi filosofi dan fengshui visual, serta dapat berbeda dengan pandangan pihak lain. Hasil analisis ini bersifat informatif, tidak perlu diperdebatkan, dan tidak wajib diyakini."
-    4. Kembalikan Jawaban HANYA berupa JSON valid sesuai skema berikut:
+    5. Kembalikan Jawaban HANYA berupa JSON valid sesuai skema berikut:
     {
+      "asset_id": "Kode/ID Aset yang terbaca di kanan atas gambar",
       "elements": {
         "body": { "visual_features": "...", "filosofi": "...", "fengshui": "..." },
         "face": { "visual_features": "...", "filosofi": "...", "fengshui": "..." },
