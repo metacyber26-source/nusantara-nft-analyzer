@@ -3,17 +3,27 @@ import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
 
-// Fungsi helper untuk penanganan retry jika terjadi error 503 / High Demand
-async function generateContentWithRetry(model, content, retries = 3, delayMs = 2000) {
-  for (let i = 0; i < retries; i++) {
+// Fungsi helper untuk delay/sleep saat retry
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Fungsi pemanggilan model dengan fitur Retry & Fallback
+async function generateContentWithRetry(genAI, modelName, prompt, imageConfig, maxRetries = 3) {
+  let attempt = 0;
+  
+  while (attempt < maxRetries) {
     try {
-      return await model.generateContent(content);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent([prompt, imageConfig]);
+      return result;
     } catch (error) {
-      const isServiceUnavailable = error.message && (error.message.includes("503") || error.message.includes("high demand") || error.message.includes("Unavailable"));
-      if (isServiceUnavailable && i < retries - 1) {
-        console.warn(`[Gemini API] Terjadi error 503/High Demand. Mencoba ulang (${i + 1}/${retries}) dalam ${delayMs}ms...`);
-        await new Promise((res) => setTimeout(res, delayMs));
-        delayMs *= 1.5; // Menambah jeda waktu tunggu
+      attempt++;
+      console.warn(`Upaya ke-${attempt} untuk model ${modelName} gagal:`, error.message);
+      
+      // Jika error 503 (Service Unavailable) atau 429 (Rate Limit), tunggu lalu coba lagi
+      if ((error.status === 503 || error.status === 429 || error.message?.includes("503")) && attempt < maxRetries) {
+        const backoffTime = attempt * 2000; // Tunggu 2s, 4s, 6s
+        console.log(`Menunggu ${backoffTime / 1000} detik sebelum mencoba lagi...`);
+        await delay(backoffTime);
       } else {
         throw error;
       }
@@ -36,7 +46,7 @@ export async function POST(req) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY belum dikonfigurasi di Vercel." },
+        { error: "GEMINI_API_KEY belum dikonfigurasi di Vercel/Environment." },
         { status: 500 }
       );
     }
@@ -46,11 +56,6 @@ export async function POST(req) {
     const base64Image = buffer.toString("base64");
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    
-    // Gunakan nama model standar dari Google AI SDK
-    // Jika gemini-1.5-flash sibuk, backend secara otomatis siap merespon
-    let modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
-    let model = genAI.getGenerativeModel({ model: modelName });
 
     const prompt = `
     Kamu adalah pakar Semiotika Seni Nusantara, Filosofi Budaya, dan Master Fengshui Visual profesional.
@@ -66,7 +71,7 @@ export async function POST(req) {
     6. DI AKHIR (field "disclaimer"), WAJIB menyantumkan kalimat eksak ini:
        "Analisis ini merupakan pendapat pribadi berbasis interpretasi filosofi dan fengshui visual, serta dapat berbeda dengan pandangan pihak lain. Hasil analisis ini bersifat informatif, tidak perlu diperdebatkan, dan tidak wajib diyakini."
 
-    Kembalikan Jawaban HANYA berupa JSON valid sesuai skema berikut tanpa Markdown/teks tambahan:
+    Kembalikan Jawaban HANYA berupa JSON valid sesuai skema berikut tanpa Markdown tambahan:
     {
       "asset_id": "ID Aset yang terbaca",
       "harmony_score": 88,
@@ -94,18 +99,30 @@ export async function POST(req) {
     }
     `;
 
-    const contentPayload = [
-      prompt,
-      {
-        inlineData: {
-          data: base64Image,
-          mimeType: image.type || "image/png",
-        },
+    const imageConfig = {
+      inlineData: {
+        data: base64Image,
+        mimeType: image.type || "image/png",
       },
-    ];
+    };
 
-    // Eksekusi API dengan proteksi Retry
-    let result = await generateContentWithRetry(model, contentPayload, 3, 2000);
+    let result;
+    // Daftar model yang dicoba secara berurutan jika model utama sibuk
+    const primaryModel = "gemini-3.6-flash";
+    const fallbackModel = "gemini-1.5-flash"; 
+
+    try {
+      // Coba model utama (gemini-3.6-flash) dengan 3x retry
+      result = await generateContentWithRetry(genAI, primaryModel, prompt, imageConfig, 3);
+    } catch (primaryErr) {
+      console.warn(`Model utama (${primaryModel}) gagal setelah retry. Mencoba model fallback (${fallbackModel})...`);
+      try {
+        // Fallback ke model cadangan jika model 3.6-flash benar-benar down/overload
+        result = await generateContentWithRetry(genAI, fallbackModel, prompt, imageConfig, 2);
+      } catch (fallbackErr) {
+        throw new Error("Server AI Google sedang mengalami lonjakan lalu lintas yang sangat tinggi (Service Unavailable). Silakan coba lagi dalam beberapa saat.");
+      }
+    }
 
     let responseText = result.response.text();
     responseText = responseText.replace(/```json|```/g, "").trim();
@@ -115,15 +132,8 @@ export async function POST(req) {
 
   } catch (error) {
     console.error("Analysis error:", error);
-    
-    // Pesan ramah untuk pengguna jika Google AI masih sibuk
-    let userErrorMessage = error.message || "Gagal menganalisis gambar.";
-    if (userErrorMessage.includes("503") || userErrorMessage.includes("high demand")) {
-      userErrorMessage = "Server Google AI sedang mengalami trafik tinggi (Error 503). Sistem telah mencoba ulang. Silakan klik tombol 'Mulai Analisis' sekali lagi.";
-    }
-
     return NextResponse.json(
-      { error: userErrorMessage },
+      { error: error.message || "Gagal menganalisis gambar." },
       { status: 500 }
     );
   }
