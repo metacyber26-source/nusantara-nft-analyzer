@@ -18,7 +18,7 @@ export async function POST(req) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY belum dikonfigurasi di Vercel." },
+        { error: "GEMINI_API_KEY belum dikonfigurasi di lingkungan server." },
         { status: 500 }
       );
     }
@@ -31,19 +31,32 @@ export async function POST(req) {
     const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
 
     const prompt = `
-    Kamu adalah seorang pakar Semiotika Seni, Filosofi Budaya, dan Praktisi Fengshui Visual profesional.
-    Tugas utamanya adalah menganalisis gambar NFT ini secara spesifik, aktual, detail, dan canggih berdasarkan fitur visual nyata yang ada pada gambar.
+    Kamu adalah pakar Semiotika Seni Nusantara, Filosofi Budaya, dan Master Fengshui Visual profesional.
+    Analisis gambar NFT ini secara mendalam, mendetail, dan sistematis.
 
     INSTRUKSI UTAMA:
-    1. Coba baca dan ekstrak **Asset ID / Token ID** yang tertulis pada gambar (terutama teks di pojok kanan atas, contoh: "Cat🐱#2353448" atau "#2353448"). Jika tidak ada, isi "Tidak Terdeteksi".
-    2. Bedah elemen-elemen berikut satu per satu (bentuk, motif, warna):
+    1. Ekstrak **Asset ID / Token ID** yang tertulis pada gambar (terutama di pojok kanan atas, contoh: "Cat🐱#2353448" atau "#2353448"). Jika tidak ada, isi "Tidak Terdeteksi".
+    2. Analisis skor keharmonisan Fengshui umum (skor 1-100) dan hitung persentase keseimbangan 5 Elemen (Wood, Fire, Earth, Metal, Water) total harus 100%.
+    3. Bedah elemen-elemen berikut jika ada pada gambar:
        - body, face, tail, eyes, eyebrow, nose, ears, beard, background.
-    3. Untuk setiap elemen, berikan "visual_features", "filosofi", dan "fengshui".
-    4. DI AKHIR (field "disclaimer"), WAJIB menyantumkan kalimat eksak ini:
+    4. Untuk tiap elemen, berikan: "visual_features", "filosofi", dan "fengshui".
+    5. Berikan ringkasan energi utama (dominant_energy) dan saran penyeimbang fengshui (balancing_advice).
+    6. DI AKHIR (field "disclaimer"), WAJIB menyantumkan kalimat eksak ini:
        "Analisis ini merupakan pendapat pribadi berbasis interpretasi filosofi dan fengshui visual, serta dapat berbeda dengan pandangan pihak lain. Hasil analisis ini bersifat informatif, tidak perlu diperdebatkan, dan tidak wajib diyakini."
-    5. Kembalikan Jawaban HANYA berupa JSON valid sesuai skema berikut:
+
+    Kembalikan Jawaban HANYA berupa JSON valid sesuai skema berikut tanpa Markdown tambahan:
     {
-      "asset_id": "Kode/ID Aset yang terbaca di kanan atas gambar",
+      "asset_id": "ID Aset yang terbaca",
+      "harmony_score": 88,
+      "dominant_energy": "Energi Yang - Api & Kayu",
+      "five_elements": {
+        "wood": 20,
+        "fire": 30,
+        "earth": 15,
+        "metal": 10,
+        "water": 25
+      },
+      "balancing_advice": "Penjelasan singkat cara menyeimbangkan energi objek.",
       "elements": {
         "body": { "visual_features": "...", "filosofi": "...", "fengshui": "..." },
         "face": { "visual_features": "...", "filosofi": "...", "fengshui": "..." },
