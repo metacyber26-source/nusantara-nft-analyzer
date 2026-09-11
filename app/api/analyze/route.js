@@ -30,7 +30,7 @@ export async function POST(req) {
     const genAI = new GoogleGenerativeAI(apiKey);
     
     // Menggunakan nama model yang kompatibel dengan API v1beta
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash-latest" });
 
     const prompt = `
     Kamu adalah seorang pakar Semiotika Seni, Filosofi Budaya, dan Praktisi Fengshui Visual profesional.
