@@ -3,6 +3,24 @@ import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
 
+// Fungsi helper untuk penanganan retry jika terjadi error 503 / High Demand
+async function generateContentWithRetry(model, content, retries = 3, delayMs = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await model.generateContent(content);
+    } catch (error) {
+      const isServiceUnavailable = error.message && (error.message.includes("503") || error.message.includes("high demand") || error.message.includes("Unavailable"));
+      if (isServiceUnavailable && i < retries - 1) {
+        console.warn(`[Gemini API] Terjadi error 503/High Demand. Mencoba ulang (${i + 1}/${retries}) dalam ${delayMs}ms...`);
+        await new Promise((res) => setTimeout(res, delayMs));
+        delayMs *= 1.5; // Menambah jeda waktu tunggu
+      } else {
+        throw error;
+      }
+    }
+  }
+}
+
 export async function POST(req) {
   try {
     const formData = await req.formData();
@@ -18,7 +36,7 @@ export async function POST(req) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY belum dikonfigurasi di lingkungan server." },
+        { error: "GEMINI_API_KEY belum dikonfigurasi di Vercel." },
         { status: 500 }
       );
     }
@@ -28,14 +46,18 @@ export async function POST(req) {
     const base64Image = buffer.toString("base64");
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
+    
+    // Gunakan nama model standar dari Google AI SDK
+    // Jika gemini-1.5-flash sibuk, backend secara otomatis siap merespon
+    let modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+    let model = genAI.getGenerativeModel({ model: modelName });
 
     const prompt = `
     Kamu adalah pakar Semiotika Seni Nusantara, Filosofi Budaya, dan Master Fengshui Visual profesional.
     Analisis gambar NFT ini secara mendalam, mendetail, dan sistematis.
 
     INSTRUKSI UTAMA:
-    1. Ekstrak **Asset ID / Token ID** yang tertulis pada gambar (terutama di pojok kanan atas, contoh: "Cat🐱#2353448" atau "#2353448"). Jika tidak ada, isi "Tidak Terdeteksi".
+    1. Ekstrak **Asset ID / Token ID** yang tertulis pada gambar (terutama di pojok kanan atas, contoh: "Cat🐱#2270858" atau "#2270858"). Jika tidak ada, isi "Tidak Terdeteksi".
     2. Analisis skor keharmonisan Fengshui umum (skor 1-100) dan hitung persentase keseimbangan 5 Elemen (Wood, Fire, Earth, Metal, Water) total harus 100%.
     3. Bedah elemen-elemen berikut jika ada pada gambar:
        - body, face, tail, eyes, eyebrow, nose, ears, beard, background.
@@ -44,7 +66,7 @@ export async function POST(req) {
     6. DI AKHIR (field "disclaimer"), WAJIB menyantumkan kalimat eksak ini:
        "Analisis ini merupakan pendapat pribadi berbasis interpretasi filosofi dan fengshui visual, serta dapat berbeda dengan pandangan pihak lain. Hasil analisis ini bersifat informatif, tidak perlu diperdebatkan, dan tidak wajib diyakini."
 
-    Kembalikan Jawaban HANYA berupa JSON valid sesuai skema berikut tanpa Markdown tambahan:
+    Kembalikan Jawaban HANYA berupa JSON valid sesuai skema berikut tanpa Markdown/teks tambahan:
     {
       "asset_id": "ID Aset yang terbaca",
       "harmony_score": 88,
@@ -72,7 +94,7 @@ export async function POST(req) {
     }
     `;
 
-    const result = await model.generateContent([
+    const contentPayload = [
       prompt,
       {
         inlineData: {
@@ -80,7 +102,10 @@ export async function POST(req) {
           mimeType: image.type || "image/png",
         },
       },
-    ]);
+    ];
+
+    // Eksekusi API dengan proteksi Retry
+    let result = await generateContentWithRetry(model, contentPayload, 3, 2000);
 
     let responseText = result.response.text();
     responseText = responseText.replace(/```json|```/g, "").trim();
@@ -90,8 +115,15 @@ export async function POST(req) {
 
   } catch (error) {
     console.error("Analysis error:", error);
+    
+    // Pesan ramah untuk pengguna jika Google AI masih sibuk
+    let userErrorMessage = error.message || "Gagal menganalisis gambar.";
+    if (userErrorMessage.includes("503") || userErrorMessage.includes("high demand")) {
+      userErrorMessage = "Server Google AI sedang mengalami trafik tinggi (Error 503). Sistem telah mencoba ulang. Silakan klik tombol 'Mulai Analisis' sekali lagi.";
+    }
+
     return NextResponse.json(
-      { error: error.message || "Gagal menganalisis gambar." },
+      { error: userErrorMessage },
       { status: 500 }
     );
   }
