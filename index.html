@@ -1,107 +1,112 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nusantara AI - Analisis Fengshui & Filosofi</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Verifier & Validator Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen py-10 px-4">
-  <div class="max-w-4xl mx-auto">
-    <header class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-amber-400">Nusantara AI - Fengshui & Filosofi Visual</h1>
-      <p class="text-slate-400 mt-2">Unggah gambar untuk menganalisis bentuk, motif, dan warna secara obyektif.</p>
-    </header>
+<body>
 
-    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 mb-8">
-      <input type="file" id="imageInput" accept="image/*" class="block w-full text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amber-500 file:text-slate-900 hover:file:bg-amber-400 cursor-pointer">
-      <button onclick="uploadImage()" id="btnSubmit" class="mt-4 w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-2 px-4 rounded-lg transition">Analisis Gambar</button>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand">
+                <i data-lucide="shield-check" class="brand-icon"></i>
+                <span class="brand-title">VerifierSim AI</span>
+            </div>
+            <div class="stats-badge">
+                <div class="stat-item">
+                    <i data-lucide="zap" class="icon-gold"></i>
+                    <span id="score-val">0</span> XP
+                </div>
+                <div class="stat-item">
+                    <i data-lucide="award" class="icon-purple"></i>
+                    Lvl <span id="level-val">1</span>
+                </div>
+                <button class="btn-settings" onclick="toggleApiModal()">
+                    <i data-lucide="key" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar-wrapper">
+            <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Daily Case Info & Refresh -->
+            <div class="meta-row">
+                <span class="badge badge-category" id="case-category">Menunggu Data...</span>
+                <span class="badge badge-level" id="case-level-tag">Level -</span>
+            </div>
+
+            <!-- Card View -->
+            <div class="card case-card">
+                <h2 id="case-title" class="case-title">Klik "Generate 10 Kasus Hari Ini"</h2>
+                <p id="case-desc" class="case-desc">Masukkan API Key Gemini Anda di menu kunci di atas, lalu tekan tombol generate di bawah untuk membuat 10 kasus simulasi harian otomatis.</p>
+                
+                <div class="document-viewer" id="doc-viewer">
+                    <p style="text-align: center; color: var(--text-secondary); padding: 10px;">Belum ada dokumen dimuat.</p>
+                </div>
+            </div>
+
+            <!-- Generator Button -->
+            <button class="btn btn-ai-generate" id="btn-generate" onclick="generateDailyCases()">
+                <i data-lucide="sparkles"></i>
+                Generate 10 Kasus Hari Ini (AI)
+            </button>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons hidden" id="action-area">
+                <button class="btn btn-reject" onclick="handleDecision('reject')">
+                    <i data-lucide="x-circle"></i>
+                    TOLAK (REJECT)
+                </button>
+                <button class="btn btn-approve" onclick="handleDecision('approve')">
+                    <i data-lucide="check-circle"></i>
+                    SETUJU (APPROVE)
+                </button>
+            </div>
+
+            <!-- Feedback -->
+            <div class="card feedback-card hidden" id="feedback-card">
+                <div class="feedback-header">
+                    <i id="feedback-icon" data-lucide="info"></i>
+                    <h3 id="feedback-title">Hasil Keputusan</h3>
+                </div>
+                <p id="feedback-text" class="feedback-text"></p>
+                
+                <div class="feedback-details">
+                    <span class="detail-label">Analisis Verifikator:</span>
+                    <p id="feedback-reason" class="reason-text"></p>
+                </div>
+
+                <button class="btn btn-next" onclick="nextCase()">
+                    Kasus Selanjutnya
+                    <i data-lucide="arrow-right"></i>
+                </button>
+            </div>
+        </main>
     </div>
 
-    <div id="loading" class="hidden text-center py-6 text-amber-400 font-semibold animate-pulse">
-      Menganalisis elemen visual, filosofi, dan Fengshui...
+    <!-- Modal API Key -->
+    <div class="modal hidden" id="api-modal">
+        <div class="modal-content">
+            <h3>Pengaturan Gemini API Key</h3>
+            <p>Masukkan API Key gratis dari Google AI Studio (aistudio.google.com):</p>
+            <input type="password" id="api-key-input" placeholder="AIzaSy..." />
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="toggleApiModal()">Batal</button>
+                <button class="btn btn-primary" onclick="saveApiKey()">Simpan</button>
+            </div>
+        </div>
     </div>
 
-    <div id="resultContainer" class="hidden space-y-6">
-      <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-        <h2 class="text-xl font-bold text-amber-400 mb-2">Deskripsi Umum Visual</h2>
-        <p id="visualDesc" class="text-slate-300"></p>
-      </div>
-
-      <div id="elementsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    </div>
-  </div>
-
-  <script>
-    async function uploadImage() {
-      const fileInput = document.getElementById('imageInput');
-      if (!fileInput.files[0]) return alert('Silakan pilih gambar terlebih dahulu');
-
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-
-      document.getElementById('loading').classList.remove('hidden');
-      document.getElementById('resultContainer').classList.add('hidden');
-
-      reader.onload = async function(e) {
-        const base64Data = e.target.result.split(',')[1];
-        
-        try {
-          const res = await fetch('/api/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              imageBase64: base64Data,
-              mimeType: file.type
-            })
-          });
-
-          const data = await res.json();
-          document.getElementById('loading').classList.add('hidden');
-
-          if (res.ok) {
-            displayResults(data);
-          } else {
-            alert('Error: ' + (data.error || 'Terjadi kesalahan'));
-          }
-        } catch (err) {
-          document.getElementById('loading').classList.add('hidden');
-          alert('Terjadi kesalahan koneksi.');
-        }
-      };
-
-      reader.readAsDataURL(file);
-    }
-
-    function displayResults(data) {
-      document.getElementById('visualDesc').innerText = data.visualDescription;
-      const grid = document.getElementById('elementsGrid');
-      grid.innerHTML = '';
-
-      data.elementsAnalysis.forEach(item => {
-        const card = `
-          <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-3">
-            <span class="inline-block bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">${item.part}</span>
-            <div class="text-xs text-slate-400 space-y-1 bg-slate-900/50 p-3 rounded-lg">
-              <div><strong class="text-slate-300">Bentuk:</strong> ${item.attributesFound.shape}</div>
-              <div><strong class="text-slate-300">Motif:</strong> ${item.attributesFound.motif}</div>
-              <div><strong class="text-slate-300">Warna:</strong> ${item.attributesFound.color}</div>
-            </div>
-            <div>
-              <h4 class="text-sm font-semibold text-amber-300 mb-1">Arti Filosofis:</h4>
-              <p class="text-xs text-slate-300 leading-relaxed">${item.philosophicalMeaning}</p>
-            </div>
-            <div>
-              <h4 class="text-sm font-semibold text-emerald-400 mb-1">Analisis Fengshui:</h4>
-              <p class="text-xs text-slate-300 leading-relaxed">${item.fengShuiAnalysis}</p>
-            </div>
-          </div>
-        `;
-        grid.innerHTML += card;
-      });
-
-      document.getElementById('resultContainer').classList.remove('hidden');
-    }
-  </script>
+    <script src="app.js"></script>
 </body>
 </html>
